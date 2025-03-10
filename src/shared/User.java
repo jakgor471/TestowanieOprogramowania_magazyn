@@ -23,7 +23,7 @@ public class User {
 	private String nrTel;
 	
 	/**
-	 * @return login
+	 * @return Login.
 	 */
 	public String getLogin() {
 		return login;
@@ -37,7 +37,7 @@ public class User {
 	}
 
 	/**
-	 * @return Imię
+	 * @return Imię.
 	 */
 	public String getImie() {
 		return imie;
@@ -51,7 +51,7 @@ public class User {
 	}
 
 	/**
-	 * @return Nazwisko
+	 * @return Nazwisko.
 	 */
 	public String getNazwisko() {
 		return nazwisko;
@@ -65,7 +65,7 @@ public class User {
 	}
 
 	/**
-	 * @return Adres zamieszkania
+	 * @return Adres zamieszkania.
 	 */
 	public Adres getAdres() {
 		return adres;
@@ -79,14 +79,14 @@ public class User {
 	}
 
 	/**
-	 * @return Numer PESEL
+	 * @return Numer PESEL.
 	 */
 	public String getNrPesel() {
 		return nrPesel;
 	}
 
 	/**
-	 * @param nrPesel Numer PESEL do ustawienia
+	 * @param nrPesel Numer PESEL do ustawienia.
 	 * @throws IllegalArgumentException Jeśli numer PESEL nie spełnia warunków walidacji.
 	 * @throws IllegalStateException Jeśli obiekt User nie posiada zdefiniowanej daty urodzenia lub płci.
 	 */
@@ -96,96 +96,78 @@ public class User {
 		if(plec == null)
 			throw new IllegalStateException("Nr PESEL może być ustawiony dopiero po ustawieniu płci");
 		
-		if(nrPesel.length() < 2)
-			throw new IllegalArgumentException("Nr PESEL zbyt krótki, musi posiadać minimum 2 znaki");
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(dataUrodzenia);
-		
-		SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
-		String pierwszeLiczby = df.format(dataUrodzenia);
-		
 		nrPesel = nrPesel.strip();
 		
-		if(!nrPesel.startsWith(pierwszeLiczby))
-			throw new IllegalArgumentException("Nr PESEL musi zaczynać się RRMMDD daty urodzenia");
-		
-		int sumaKontrolna = 0;
-		int[] wagi = {1, 3, 7, 9};
-		for(int i = 0; i < nrPesel.length() - 1; ++i) {
-			int cyfra = Character.getNumericValue(nrPesel.charAt(i));
-			
-			sumaKontrolna += cyfra * wagi[i % 4];
-		}
-		
-		sumaKontrolna = 10 - (sumaKontrolna % 10);
-		
-		if(sumaKontrolna != Character.getNumericValue(nrPesel.charAt(nrPesel.length() - 1)))
-			throw new IllegalArgumentException("Nieprawidłowa suma kontrolna nr PESEL");
-		
-		int cyfraPlci = Character.getNumericValue(nrPesel.charAt(nrPesel.length() - 2));
-		
-		if(cyfraPlci % 2 == 0 && plec != Gender.Kobieta)
-			throw new IllegalArgumentException("Przedostatnia cyfra musi być parzysta lub 0 jeśli użytkownik to kobieta");
-		if(cyfraPlci % 2 == 1 && plec != Gender.Mezczyzna)
-			throw new IllegalArgumentException("Przedostatnia cyfra musi być nieparzysta jeśli użytkownik to mężczyzna");
+		if(!DataValidation.validatePesel(nrPesel, dataUrodzenia, plec))
+			return;
 		
 		this.nrPesel = nrPesel;
 	}
 
 	/**
-	 * @return the dataUrodzenia
+	 * @return Data urodzenia.
 	 */
 	public Date getDataUrodzenia() {
 		return dataUrodzenia;
 	}
 
 	/**
-	 * @param dataUrodzenia the dataUrodzenia to set
+	 * @param dataUrodzenia Data urodzenia do ustawienia.
 	 */
 	public void setDataUrodzenia(Date dataUrodzenia) {
 		this.dataUrodzenia = dataUrodzenia;
 	}
 
 	/**
-	 * @return the plec
+	 * @return Płeć.
 	 */
 	public Gender getPlec() {
 		return plec;
 	}
 
 	/**
-	 * @param plec the plec to set
+	 * @param plec Płeć do ustawienia.
 	 */
 	public void setPlec(Gender plec) {
 		this.plec = plec;
 	}
 
 	/**
-	 * @return the email
+	 * @return Adres e-mail.
 	 */
 	public String getEmail() {
 		return email;
 	}
 
 	/**
-	 * @param email the email to set
+	 * @param email Adres e-mail do ustawienia.
+	 * @throws IllegalArgumentException Jeśli adres e-mail nie spełnia warunków walidacji.
 	 */
-	public void setEmail(String email) {
+	public void setEmail(String email) throws IllegalArgumentException {
+		email = email.trim();
+		
+		if(!DataValidation.validateEmail(email))
+			return;
+		
 		this.email = email;
 	}
 
 	/**
-	 * @return the nrTel
+	 * @return Numer telefonu.
 	 */
 	public String getNrTel() {
 		return nrTel;
 	}
 
 	/**
-	 * @param nrTel the nrTel to set
+	 * @param nrTel Numer telefonu do ustawienia.
+	 * @throws IllegalArgumentException Jeśli numer telefonu ma długość inną niż 9 cyfr.
 	 */
 	public void setNrTel(String nrTel) {
+		nrTel.trim();
+		
+		if(nrTel.length() != 9)
+			throw new IllegalArgumentException("Numer telefonu musi mieć 9 cyfr");
 		this.nrTel = nrTel;
 	}
 
