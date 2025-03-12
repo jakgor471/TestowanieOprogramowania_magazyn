@@ -11,7 +11,7 @@ import java.util.IllegalFormatException;
  * @author jakgor471
  *
  */
-public class User {
+public class User implements Cloneable{
 	private String login;
 	private String imie;
 	private String nazwisko;
@@ -21,6 +21,11 @@ public class User {
 	private Gender plec;
 	private String email;
 	private String nrTel;
+	
+	public User() {
+		adres = new Adres();
+		dataUrodzenia = new Date();
+	}
 	
 	/**
 	 * @return Login.
@@ -87,20 +92,8 @@ public class User {
 
 	/**
 	 * @param nrPesel Numer PESEL do ustawienia.
-	 * @throws IllegalArgumentException Jeśli numer PESEL nie spełnia warunków walidacji.
-	 * @throws IllegalStateException Jeśli obiekt User nie posiada zdefiniowanej daty urodzenia lub płci.
 	 */
-	public void setNrPesel(String nrPesel) throws IllegalArgumentException, IllegalStateException {
-		if(dataUrodzenia == null)
-			throw new IllegalStateException("Nr PESEL może być ustawiony dopiero po ustawieniu daty urodzenia");
-		if(plec == null)
-			throw new IllegalStateException("Nr PESEL może być ustawiony dopiero po ustawieniu płci");
-		
-		nrPesel = nrPesel.strip();
-		
-		if(!DataValidation.validatePesel(nrPesel, dataUrodzenia, plec))
-			return;
-		
+	public void setNrPesel(String nrPesel) {		
 		this.nrPesel = nrPesel;
 	}
 
@@ -141,14 +134,8 @@ public class User {
 
 	/**
 	 * @param email Adres e-mail do ustawienia.
-	 * @throws IllegalArgumentException Jeśli adres e-mail nie spełnia warunków walidacji.
 	 */
 	public void setEmail(String email) throws IllegalArgumentException {
-		email = email.trim();
-		
-		if(!DataValidation.validateEmail(email))
-			return;
-		
 		this.email = email;
 	}
 
@@ -159,16 +146,23 @@ public class User {
 		return nrTel;
 	}
 
-	/**
-	 * @param nrTel Numer telefonu do ustawienia.
-	 * @throws IllegalArgumentException Jeśli numer telefonu ma długość inną niż 9 cyfr.
-	 */
 	public void setNrTel(String nrTel) {
-		nrTel.trim();
-		
-		if(nrTel.length() != 9)
-			throw new IllegalArgumentException("Numer telefonu musi mieć 9 cyfr");
 		this.nrTel = nrTel;
+	}
+	
+	public Object clone() {
+		User nowy = new User();
+		nowy.adres = (Adres)this.adres.clone();
+		nowy.dataUrodzenia = (Date)this.dataUrodzenia.clone();
+		nowy.email = this.email;
+		nowy.imie = this.imie;
+		nowy.login = this.login;
+		nowy.nazwisko = this.nazwisko;
+		nowy.nrPesel = this.nrPesel;
+		nowy.nrTel = this.nrTel;
+		nowy.plec = this.plec;
+		
+		return nowy;
 	}
 
 	/**
@@ -177,7 +171,7 @@ public class User {
 	 * @author jakgor471
 	 *
 	 */
-	public static class Adres{
+	public static class Adres implements Cloneable{
 		protected String miejscowosc;
 		protected String kodPocztowy;
 		protected String ulica;
@@ -214,6 +208,17 @@ public class User {
 		public void setNrLokalu(String nrLokalu) {
 			this.nrLokalu = nrLokalu;
 		}
+		
+		public Object clone() {
+			Adres nowy = new Adres();
+			nowy.kodPocztowy = this.kodPocztowy;
+			nowy.miejscowosc = this.miejscowosc;
+			nowy.nrLokalu = this.nrLokalu;
+			nowy.nrPosesji = this.nrPosesji;
+			nowy.ulica = this.ulica;
+			
+			return nowy;
+		}
 	}
 	
 	/**
@@ -223,6 +228,15 @@ public class User {
 	 */
 	public static enum Gender{
 		Kobieta,
-		Mezczyzna
+		Mezczyzna;
+	
+		/**
+		 * @return Przyjazna nazwa.
+		 */
+		public String toString() {
+			if(this.ordinal() == 0)
+				return "Kobieta";
+			return "Mężczyzna";
+		}
 	}
 }

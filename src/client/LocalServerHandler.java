@@ -3,6 +3,11 @@ package client;
 import shared.ActiveSession;
 import shared.User;
 
+/**
+ * Klasa implementująca interfejs ServerHandler, odpowiedzialna za wewnątrzprocesową komunikację z serwerem po stronie klienta
+ * @author jakgor471
+ *
+ */
 public class LocalServerHandler implements ServerHandler{
 	private ActiveSession session;
 	
