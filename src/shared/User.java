@@ -1,9 +1,6 @@
 package shared;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.IllegalFormatException;
 
 /**
  * Klasa używana do reprezentowania użytkownika i jego danych wyszczególnionych w specyfikacji projektowej.
@@ -21,12 +18,38 @@ public class User implements Cloneable{
 	private Gender plec;
 	private String email;
 	private String nrTel;
+	private String hasloHash;
+	private boolean zapomniany;
 	
 	public User() {
 		adres = new Adres();
 		dataUrodzenia = new Date();
+		zapomniany = false;
 	}
 	
+	public String toString() {
+		String imieNazwisko = imie + " " + nazwisko;
+		
+		if(imieNazwisko.length() > 32) {
+			imieNazwisko = imieNazwisko.substring(0, 29) + "...";
+		}
+		
+		return imieNazwisko + " (" + login + ")";
+	}
+	
+	public void forgetUser() {
+		imie = DataValidation.randomString(32);
+		nazwisko = DataValidation.randomString(32);
+		plec = (Math.random() > 0.5 ? Gender.Kobieta : Gender.Mezczyzna);
+		dataUrodzenia = DataValidation.randomDate();
+		nrPesel = DataValidation.randomPesel(dataUrodzenia, plec);
+		zapomniany = true;
+	}
+	
+	public boolean isForgotten() {
+		return zapomniany;
+	}
+
 	/**
 	 * @return Login.
 	 */
@@ -150,6 +173,18 @@ public class User implements Cloneable{
 		this.nrTel = nrTel;
 	}
 	
+	public String getHasloHash() {
+		return hasloHash;
+	}
+
+	public void setHasloHash(String hasloHash) {
+		this.hasloHash = hasloHash;
+	}
+	
+	public void setHaslo(String haslo) {
+		this.hasloHash = DataValidation.hashPassword(haslo);
+	}
+
 	public Object clone() {
 		User nowy = new User();
 		nowy.adres = (Adres)this.adres.clone();
@@ -161,6 +196,7 @@ public class User implements Cloneable{
 		nowy.nrPesel = this.nrPesel;
 		nowy.nrTel = this.nrTel;
 		nowy.plec = this.plec;
+		nowy.hasloHash = this.hasloHash;
 		
 		return nowy;
 	}

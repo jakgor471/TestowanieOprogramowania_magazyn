@@ -1,16 +1,20 @@
 package shared;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import shared.User.Gender;
 
 /**
- * Klasa pomocnicza implementująca metody do walidacji danych oraz metod pomocniczych.
+ * Klasa pomocnicza implementująca metody do walidacji danych oraz metody pomocnicze.
  * @author jakgor471
  *
  */
@@ -18,8 +22,12 @@ public final class DataValidation {
 	private static final int[] WAGI_PESEL = {1, 3, 7, 9};
 	private static final SimpleDateFormat PESEL_DATAFORMAT = new SimpleDateFormat("yyMMdd");
 	private static final SimpleDateFormat DATAFORMAT = new SimpleDateFormat("dd-MM-yyyy");
+	private static final SimpleDateFormat SQLDATAFORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private static final Pattern EMAIL_REGEX = Pattern.compile("[\\w\\d\\.]+@[\\w\\d\\.]+");
 	private static final Pattern DATA_REGEX = Pattern.compile("\\d{2}-\\d{2}-\\d{4}");
+	private static final Pattern NRTEL_REGEX = Pattern.compile("\\d{9}");
+	private static final String LETTERS = "AĄBCĆDEĘFGHIJKLŁMNOÓPRSTUWZŹŻXYaąbcćdeęfghijklłmnoóprstuwzźżxy";
+	private static final Random rand = new Random();
 	
 	static {
 		DATAFORMAT.setLenient(false);
@@ -27,6 +35,54 @@ public final class DataValidation {
 	
 	private DataValidation() {
 		
+	}
+	
+	public static String hashPassword(String passwd) {
+		try {
+			MessageDigest mg = MessageDigest.getInstance("SHA-256");
+			byte[] bytes = mg.digest(passwd.getBytes());
+			
+			return Base64.getEncoder().encodeToString(bytes);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public static String randomString(int length) {
+		StringBuilder sb = new StringBuilder(length);
+		
+		for(int i = 0; i < length; ++i) {
+			sb.append(LETTERS.charAt(rand.nextInt(LETTERS.length())));
+		}
+		
+		return sb.toString();
+	}
+	
+	public static Date randomDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(1970 + rand.nextInt(200), rand.nextInt(12), rand.nextInt(27));
+		
+		return cal.getTime();
+	}
+	
+	public static String randomPesel(Date dataUrodzenia, Gender plec) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dataUrodzenia);
+		
+		String pierwszeLiczby = PESEL_DATAFORMAT.format(dataUrodzenia);
+		int lp = 1000 + rand.nextInt(8999);
+		
+		if(plec == Gender.Kobieta)
+			lp -= lp % 2;
+		else
+			lp += 1 - (lp % 2);
+		
+		String pesel = pierwszeLiczby + lp;
+		pesel += peselControl(pesel, pesel.length());
+		
+		return pesel;
 	}
 	
 	/**
@@ -55,16 +111,7 @@ public final class DataValidation {
 		if(!nrPesel.startsWith(pierwszeLiczby))
 			throw new IllegalArgumentException("Nr PESEL musi zaczynać się RRMMDD daty urodzenia");
 		
-		int sumaKontrolna = 0;
-		for(int i = 0; i < nrPesel.length() - 1; ++i) {
-			int cyfra = Character.getNumericValue(nrPesel.charAt(i));
-			
-			sumaKontrolna += cyfra * WAGI_PESEL[i % 4];
-		}
-		
-		sumaKontrolna = 10 - (sumaKontrolna % 10);
-		
-		if(sumaKontrolna != Character.getNumericValue(nrPesel.charAt(nrPesel.length() - 1)))
+		if(peselControl(nrPesel, nrPesel.length() - 1) != Character.getNumericValue(nrPesel.charAt(nrPesel.length() - 1)))
 			throw new IllegalArgumentException("Nieprawidłowa suma kontrolna nr PESEL");
 		
 		int cyfraPlci = Character.getNumericValue(nrPesel.charAt(nrPesel.length() - 2));
@@ -75,6 +122,20 @@ public final class DataValidation {
 			throw new IllegalArgumentException("Przedostatnia cyfra musi nr PESEL być nieparzysta jeśli użytkownik to mężczyzna");
 		
 		return true;
+	}
+	
+	private static int peselControl(String nrPesel, int length) {
+		int sumaKontrolna = 0;
+		for(int i = 0; i < length; ++i) {
+			int cyfra = Character.getNumericValue(nrPesel.charAt(i));
+			
+			sumaKontrolna += cyfra * WAGI_PESEL[i % 4];
+		}
+		
+		if(sumaKontrolna % 10 == 0)
+			return 0;
+		else
+			return 10 - sumaKontrolna % 10;
 	}
 	
 	/**
@@ -103,6 +164,11 @@ public final class DataValidation {
 	public static boolean validateNrTel(String nrTel) throws IllegalArgumentException{
 		if(nrTel.length() != 9)
 			throw new IllegalArgumentException("Numer telefonu musi mieć 9 cyfr");
+		
+		Matcher match = NRTEL_REGEX.matcher(nrTel);
+		
+		if(!match.matches())
+			throw new IllegalArgumentException("Nr telefonu nie pasuje do wzorca");
 		
 		return true;
 	}
@@ -135,5 +201,18 @@ public final class DataValidation {
 	 */
 	public static String dateToString(Date data) {
 		return DATAFORMAT.format(data);
+	}
+	
+	/**
+	 * Konwertuje datę na ciąg znaków w formacie RRRR-MM-DD.
+	 * @param data Data, która zostanie przekonwertowana na ciąg znaków.
+	 * @return Ciąg znaków reprezentujący datę.
+	 */
+	public static String dateToSqlString(Date data) {
+		return SQLDATAFORMAT.format(data);
+	}
+	
+	public static Date stringToDate(String str) throws ParseException {
+		return SQLDATAFORMAT.parse(str);
 	}
 }

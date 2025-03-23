@@ -26,5 +26,6 @@ replay_pid*
 bin/
 .settings/
 releases/
-
+dependencies/
 doc/
+*.db

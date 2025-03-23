@@ -1,31 +1,25 @@
 package gui;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
-import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import shared.DataValidation;
 import shared.User;
@@ -41,8 +35,10 @@ public class EditUserPanel extends JPanel {
 	private static final URL errorIcon = EditUserPanel.class.getResource("/images/exclamation.png");
 	
 	private User edytowanyUzytkownik;
+	private String originalLogin;
 	
 	private EnumMap<Fields, InputIconPair> pola;
+	private ArrayList<ActionListener> onClick;
 	
 	private static class InputIconPair{
 		public Component input;
@@ -91,6 +87,7 @@ public class EditUserPanel extends JPanel {
 		
 		InputIconPair nowe = null;
 		pola = new EnumMap<>(Fields.class);
+		onClick = new ArrayList<ActionListener>();
 		
 		gbc.gridy = 0;
 		
@@ -240,13 +237,29 @@ public class EditUserPanel extends JPanel {
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				validateData();
+				if(!validateData())
+					return;
+				
+				for(ActionListener al : onClick)
+					al.actionPerformed(e);
 			}
 			
 		});
 		this.add(button, gbc);
 		gbc.gridx = 2;
 		this.add(Box.createHorizontalStrut(16), gbc);
+	}
+	
+	public void addActionListener(ActionListener al) {
+		onClick.add(al);
+	}
+	
+	public void removeActionListener(ActionListener al) {
+		onClick.remove(al);
+	}
+	
+	public String getOriginalLogin() {
+		return originalLogin;
 	}
 	
 	/**
@@ -256,6 +269,8 @@ public class EditUserPanel extends JPanel {
 	 */
 	public void setUzytkownik(User uzytkownik) {
 		this.edytowanyUzytkownik = (User)uzytkownik.clone();
+		
+		originalLogin = edytowanyUzytkownik.getLogin();
 		
 		((JTextField)pola.get(Fields.KodPocztowy).input).setText(edytowanyUzytkownik.getAdres().getKodPocztowy());
 		((JTextField)pola.get(Fields.Miejscowosc).input).setText(edytowanyUzytkownik.getAdres().getMiejscowosc());
@@ -302,7 +317,7 @@ public class EditUserPanel extends JPanel {
 			nowy.setLogin(((JTextField)pola.get(Fields.Login).input).getText());
 			nowy.setNrTel(((JTextField)pola.get(Fields.NrTel).input).getText());
 		} catch(Exception e) {
-			
+			return null;
 		}
 		
 		return nowy;
@@ -316,6 +331,8 @@ public class EditUserPanel extends JPanel {
 	 * @return Prawda jeśli proces walidacji przeszedł pomyślnie.
 	 */
 	public boolean validateData() {
+		boolean error = false;
+		
 		for(Entry<Fields, InputIconPair> iip : pola.entrySet()) {
 			if(iip.getValue().input instanceof JTextField) {
 				setError(iip.getKey(), null);
@@ -328,6 +345,7 @@ public class EditUserPanel extends JPanel {
 				
 				if(textfield.getText().trim().isEmpty()) {
 					setError(iip.getKey(), "Pole nie może być puste!");
+					error = error || true;
 				}
 			}
 		}
@@ -340,6 +358,7 @@ public class EditUserPanel extends JPanel {
 				d = DataValidation.validateDate(text);
 			} catch(IllegalArgumentException e) {
 				setError(Fields.DataUr, e.getMessage());
+				error = error || true;
 			}
 		}
 		
@@ -349,6 +368,7 @@ public class EditUserPanel extends JPanel {
 				DataValidation.validateEmail(text);
 			} catch(IllegalArgumentException e) {
 				setError(Fields.Email, e.getMessage());
+				error = error || true;
 			}
 		}
 		
@@ -358,6 +378,7 @@ public class EditUserPanel extends JPanel {
 				DataValidation.validateNrTel(text);
 			} catch(IllegalArgumentException e) {
 				setError(Fields.NrTel, e.getMessage());
+				error = error || true;
 			}
 		}
 		
@@ -367,10 +388,17 @@ public class EditUserPanel extends JPanel {
 				DataValidation.validatePesel(text, d, plec);
 			} catch(IllegalArgumentException e) {
 				setError(Fields.NrPesel, e.getMessage());
+				error = error || true;
 			}
 		}
 		
-		return true;
+		return !error;
+	}
+	
+	public void setEditable(boolean editable) {
+		for(Entry<Fields, InputIconPair> iip : pola.entrySet()) {
+			iip.getValue().input.setEnabled(editable);
+		}
 	}
 	
 	/**
