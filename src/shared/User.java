@@ -34,7 +34,7 @@ public class User implements Cloneable{
 			imieNazwisko = imieNazwisko.substring(0, 29) + "...";
 		}
 		
-		return imieNazwisko + " (" + login + ")";
+		return login + ": " + imieNazwisko;
 	}
 	
 	public void forgetUser() {

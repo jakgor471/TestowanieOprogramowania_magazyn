@@ -2,6 +2,7 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -31,6 +32,7 @@ import javax.swing.event.ListSelectionListener;
 
 import gui.EditUserPanel;
 import gui.FilteredUserListModel;
+import gui.InfoPanel;
 import server.ClientCommunicationHandler;
 import server.DBServer;
 import shared.DataValidation;
@@ -81,7 +83,7 @@ public class App {
 			public void actionPerformed(ActionEvent ae) {
 				JDialog subframe = new JDialog(frame, "Dodaj użytkownika");
 				EditUserPanel eup = new EditUserPanel();
-				subframe.getContentPane().add(eup);
+				subframe.getContentPane().add(new JScrollPane(eup));
 				
 				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				subframe.setSize(400, 520);
@@ -123,7 +125,7 @@ public class App {
 					return;
 				JDialog subframe = new JDialog(frame, "Edytuj użytkownika");
 				EditUserPanel eup = new EditUserPanel();
-				subframe.getContentPane().add(eup);
+				subframe.getContentPane().add(new JScrollPane(eup));
 				
 				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				subframe.setSize(400, 520);
@@ -154,13 +156,21 @@ public class App {
 			}
 		});
 		
+		InfoPanel userInfo = new InfoPanel();
+		
 		userList.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting())
 					return;
 				
-				mEditUser.setEnabled(userList.getSelectedIndex() > -1);
+				boolean selected = userList.getSelectedIndex() > -1;
+				
+				mEditUser.setEnabled(selected);
+				
+				if(selected) {
+					userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
+				}
 			}
 			
 		});
@@ -179,8 +189,6 @@ public class App {
 		
 		JButton filterEnt = new JButton("Filtruj");
 		filterEnt.setToolTipText("Filter the entitiy list, hold Shift to clear the filter");
-		
-		
 		JTextField findtext = new JTextField();
 		findtext.setToolTipText("Text to search for");
 		
@@ -199,8 +207,7 @@ public class App {
 
 		leftPanel.add((Component) entcpl, "South");
 		
-		EditUserPanel eup = new EditUserPanel();
-		JSplitPane mainSplit = new JSplitPane(1, leftPanel, eup);
+		JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, userInfo);
 		
 		/*User user = new User();
 		user.setLogin("login133");
@@ -235,6 +242,7 @@ public class App {
 		
 		frame.getContentPane().add(mainSplit);
 		mainSplit.setDividerLocation(275);
+		mainSplit.setResizeWeight(0.5);
 		
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setSize(720, 520);

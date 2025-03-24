@@ -237,7 +237,7 @@ public class DBServer implements Closeable {
 			
 			stmt.executeUpdate();
 			
-			stmt = dbConn.prepareStatement("UPDATE adresy SET miejscowosc = ?, kodPocztowy = ?, ulica = ?, nrPosesji = ?, nrLokalu = ? WHERE id = (SELECT id FROM uzytkownicyAdresy WHERE uzytkownikLogin = ?);");
+			stmt = dbConn.prepareStatement("UPDATE adresy SET miejscowosc = ?, kodPocztowy = ?, ulica = ?, nrPosesji = ?, nrLokalu = ? WHERE adresy.id = (SELECT adresId FROM uzytkownicyAdresy WHERE uzytkownikLogin = ?);");
 			stmt.setString(1, user.getAdres().getMiejscowosc());
 			stmt.setString(2, user.getAdres().getKodPocztowy());
 			stmt.setString(3, user.getAdres().getUlica());
