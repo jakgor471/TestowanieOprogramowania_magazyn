@@ -46,6 +46,8 @@ public abstract class ServerCommunicationHandler {
 	 */
 	public abstract void editUser(User user, String oldLogin);
 	
+	public abstract void forgetUser(User user);
+	
 	/**
 	 * 
 	 * @return Odpowiedź serwera po ostatniej interakcji.

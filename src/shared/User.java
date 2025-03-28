@@ -20,6 +20,8 @@ public class User implements Cloneable{
 	private String nrTel;
 	private String hasloHash;
 	private boolean zapomniany;
+	private Date dataZapomnienia;
+	private String zapomnianyPrzez;
 	
 	public User() {
 		adres = new Adres();
@@ -48,6 +50,10 @@ public class User implements Cloneable{
 	
 	public boolean isForgotten() {
 		return zapomniany;
+	}
+	
+	public void setForgotten(boolean b) {
+		this.zapomniany = b;
 	}
 
 	/**
@@ -183,6 +189,22 @@ public class User implements Cloneable{
 	
 	public void setHaslo(String haslo) {
 		this.hasloHash = DataValidation.hashPassword(haslo);
+	}
+
+	public Date getDataZapomnienia() {
+		return dataZapomnienia;
+	}
+
+	public void setDataZapomnienia(Date dataZapomnienia) {
+		this.dataZapomnienia = dataZapomnienia;
+	}
+
+	public String getZapomnianyPrzez() {
+		return zapomnianyPrzez;
+	}
+
+	public void setZapomnianyPrzez(String zapomnianyPrzez) {
+		this.zapomnianyPrzez = zapomnianyPrzez;
 	}
 
 	public Object clone() {

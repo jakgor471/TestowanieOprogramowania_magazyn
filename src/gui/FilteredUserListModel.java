@@ -11,6 +11,7 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 	private List<User> users;
 	private ArrayList<User> filtered;
 	private String criterium;
+	private boolean showForgotten;
 	
 	public FilteredUserListModel(List<User> users) {
 		this.users = users;
@@ -33,6 +34,8 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 		
 		if(criterium == null || criterium.isEmpty()) {
 			for(User u : users) {
+				if(u.isForgotten() ^ showForgotten)
+					continue;
 				filtered.add(u);
 			}
 			
@@ -41,6 +44,8 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 		}
 		
 		for(User u : users) {
+			if(u.isForgotten() ^ showForgotten)
+				continue;
 			if(u.getLogin().toLowerCase().contains(criterium) || u.getImie().toLowerCase().contains(criterium) || u.getNazwisko().toLowerCase().contains(criterium))
 				filtered.add(u);
 		}
@@ -64,6 +69,14 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 	@Override
 	public User getElementAt(int index) {
 		return filtered.get(index);
+	}
+
+	public boolean isShowForgotten() {
+		return showForgotten;
+	}
+
+	public void setShowForgotten(boolean showForgotten) {
+		this.showForgotten = showForgotten;
 	}
 
 }

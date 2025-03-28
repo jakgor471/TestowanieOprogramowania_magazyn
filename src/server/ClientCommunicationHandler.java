@@ -1,5 +1,6 @@
 package server;
 
+import java.util.Date;
 import java.util.List;
 
 import client.ServerCommunicationHandler;
@@ -33,10 +34,15 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		if(user == null)
 			return;
 		
-		if(!session.isAdmin())
+		if(session == null || !session.isAdmin())
 			throw new RuntimeException("Nieprawidłowe uprawnienia!");
 		
-		server.addUser(user);
+		try {
+			server.addUser((User)user.clone());
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Problem bazodanowy! " + e.getMessage());
+		}
 	}
 	
 	public void editUser(User user, String oldLogin) throws RuntimeException{
@@ -46,10 +52,31 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		if(oldLogin == null)
 			oldLogin = user.getLogin();
 		
-		if(!session.isAdmin())
+		if(session == null || !session.isAdmin())
 			throw new RuntimeException("Nieprawidłowe uprawnienia!");
 		
-		server.editUser(user, oldLogin);
+		try {
+			server.editUser((User)user.clone(), oldLogin);
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Problem bazodanowy! " + e.getMessage());
+		}
+	}
+	
+	public void forgetUser(User user) {
+		if(session == null || !session.isAdmin())
+			throw new RuntimeException("Nieprawidłowe uprawnienia!");
+		
+		try {
+			User forgotten = (User)user.clone();
+			forgotten.forgetUser();
+			forgotten.setZapomnianyPrzez(session.getLogin());
+			forgotten.setDataZapomnienia(new Date());
+			server.editUser(forgotten, forgotten.getLogin());
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Problem bazodanowy! " + e.getMessage());
+		}
 	}
 
 	@Override

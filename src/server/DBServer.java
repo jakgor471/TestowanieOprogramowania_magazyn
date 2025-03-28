@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import shared.ActiveSession;
@@ -125,6 +126,12 @@ public class DBServer implements Closeable {
 					u.setPlec(Gender.values()[rs.getInt("plec")]);
 					u.setEmail(rs.getString("email"));
 					u.setNrTel(rs.getString("numerTelefonu"));
+					u.setForgotten(rs.getBoolean("zapomniany"));
+					
+					if(u.isForgotten()) {
+						u.setZapomnianyPrzez(rs.getString("zapomnianyPrzez"));
+						u.setDataZapomnienia(DataValidation.stringToDate(rs.getString("dataZapomnienia")));
+					}
 					
 					u.getAdres().setKodPocztowy(rs.getString("kodPocztowy"));
 					u.getAdres().setMiejscowosc(rs.getString("miejscowosc"));
@@ -207,23 +214,22 @@ public class DBServer implements Closeable {
 		
 		try {
 			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
-			
 			PreparedStatement stmt = dbConn.prepareStatement("SELECT Count(login) FROM uzytkownicy WHERE login = ?;");
-			stmt.setString(1, user.getLogin());
 			
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next() && rs.getInt(1) > 1)
+			ResultSet rs;
+			stmt.setString(1, user.getLogin());
+			rs = stmt.executeQuery();
+			
+			if(!rs.next())
+				throw new RuntimeException("Nie znaleziono wskazanego użytkownika!");
+				
+			if(oldLogin != null && oldLogin.equals(user.getLogin())) {
+				if(rs.getInt(1) < 1)
+					throw new RuntimeException("Nie znaleziono wskazanego użytkownika!");
+			} else if(rs.getInt(1) > 0)
 				throw new IllegalArgumentException("Nieunikalny login użytkownika!");
 			
-			if(oldLogin != null && !oldLogin.equals(user.getLogin())) {
-				stmt.setString(1, oldLogin);
-				rs = stmt.executeQuery();
-				
-				if(rs.next() && rs.getInt(1) != 1)
-					throw new IllegalArgumentException("Nie znaleziono wskazanego użytkownika!");
-			}
-			
-			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, haslo = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ? WHERE login = ?;");
+			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, haslo = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ?, zapomniany = ?, dataZapomnienia = ?, zapomnianyPrzez = ? WHERE login = ?;");
 			stmt.setString(1, user.getLogin());
 			stmt.setString(2, user.getHasloHash());
 			stmt.setString(3, user.getImie());
@@ -233,7 +239,14 @@ public class DBServer implements Closeable {
 			stmt.setInt(7, user.getPlec().ordinal());
 			stmt.setString(8, user.getEmail());
 			stmt.setString(9, user.getNrTel());
-			stmt.setString(10, oldLogin);
+			stmt.setBoolean(10, user.isForgotten());
+			
+			if(user.isForgotten()) {
+				stmt.setString(11, DataValidation.dateToSqlString(user.getDataZapomnienia()));
+				stmt.setString(12, user.getZapomnianyPrzez());
+			}
+			
+			stmt.setString(13, oldLogin);
 			
 			stmt.executeUpdate();
 			
