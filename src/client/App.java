@@ -205,7 +205,8 @@ public class App {
 				
 				if(selected) {
 					userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
-				}
+				} else
+					userInfo.setText("");
 			}
 			
 		});
@@ -247,6 +248,8 @@ public class App {
 				userListModel.setShowForgotten(!userListModel.isShowForgotten());
 				filterEnt.setText(userListModel.isShowForgotten() ? "Aktywni" : "Zapomnieni");
 				userListModel.filter();
+				
+				userList.clearSelection();
 			}
 		});
 		
