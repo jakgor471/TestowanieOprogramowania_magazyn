@@ -23,7 +23,7 @@ public final class DataValidation {
 	private static final SimpleDateFormat PESEL_DATAFORMAT = new SimpleDateFormat("yyMMdd");
 	private static final SimpleDateFormat DATAFORMAT = new SimpleDateFormat("dd-MM-yyyy");
 	private static final SimpleDateFormat SQLDATAFORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	private static final Pattern EMAIL_REGEX = Pattern.compile("[\\w\\d\\.]+@[\\w\\d\\.]+");
+	private static final Pattern EMAIL_REGEX = Pattern.compile("[\\w\\d\\.\\-]+@[\\w\\d\\.]+");
 	private static final Pattern DATA_REGEX = Pattern.compile("\\d{2}-\\d{2}-\\d{4}");
 	private static final Pattern NRTEL_REGEX = Pattern.compile("\\d{9}");
 	private static final String LETTERS = "AĄBCĆDEĘFGHIJKLŁMNOÓPRSTUWZŹŻXYaąbcćdeęfghijklłmnoóprstuwzźżxy";

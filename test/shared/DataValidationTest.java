@@ -1,12 +1,14 @@
 package shared;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Date;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import shared.User.Gender;
 
 class DataValidationTest {
+	static Random rand = new Random(65536);
 
 	@Test
 	void validatePeselTest() {
@@ -95,7 +97,7 @@ class DataValidationTest {
 	@Test
 	void randomPeselTest() {
 		for(int i = 0; i < 100; ++i) {
-			Gender g = Gender.values()[((int)(Math.random() * 10)) % 2];
+			Gender g = Gender.values()[(rand.nextInt(10)) % 2];
 			Date d = DataValidation.randomDate();
 			
 			String pesel = DataValidation.randomPesel(d, g);
@@ -111,7 +113,7 @@ class DataValidationTest {
 				"mariusznowak@gmail.com",
 				"mariusznowak@outlook.com",
 				"justynakowalska@uni.lodz.pl",
-				"justynakowalska@edu.uni.lodz.pl",
+				"justyna-kowalska@edu.uni.lodz.pl",
 				"michalek_patyczkowski123456789@edu.uni.lodz.pl",
 		};
 		
@@ -216,7 +218,7 @@ class DataValidationTest {
 	void validateDateFromPeselTest() {
 		for(int i = 0; i < 100; ++i) {
 			Date d = DataValidation.randomDate();
-			Gender g = Gender.values()[((int)(Math.random() * 10)) % 2];
+			Gender g = Gender.values()[(rand.nextInt(10)) % 2];
 			
 			String pesel = DataValidation.randomPesel(d, g);
 			Date d2 = DataValidation.dateFromPesel(pesel);
