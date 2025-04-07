@@ -62,13 +62,15 @@ public final class DataValidation {
 	
 	public static Date randomDate() {
 		Calendar cal = Calendar.getInstance();
-		cal.set(1970 + rand.nextInt(200), rand.nextInt(12), rand.nextInt(27));
+		cal.clear();
+		cal.set(1900 + rand.nextInt(100), rand.nextInt(12), rand.nextInt(27));
 		
 		return cal.getTime();
 	}
 	
 	public static String randomPesel(Date dataUrodzenia, Gender plec) {
 		Calendar cal = Calendar.getInstance();
+		cal.clear();
 		cal.setTime(dataUrodzenia);
 		
 		String pierwszeLiczby = PESEL_DATAFORMAT.format(dataUrodzenia);
@@ -214,5 +216,21 @@ public final class DataValidation {
 	
 	public static Date stringToDate(String str) throws ParseException {
 		return SQLDATAFORMAT.parse(str);
+	}
+	
+	public static Date dateFromPesel(String pesel) throws IllegalArgumentException{
+		try {
+			int year = 1900 + Integer.parseInt(pesel.substring(0, 2));
+			int month = Integer.parseInt(pesel.substring(2, 4));
+			int day = Integer.parseInt(pesel.substring(4, 6));
+			
+			Calendar cal = Calendar.getInstance();
+			cal.clear();
+			cal.set(year, month - 1, day);
+			
+			return cal.getTime();
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("Niepoprawny PESEL");
+		}
 	}
 }

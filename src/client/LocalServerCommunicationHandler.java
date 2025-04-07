@@ -1,10 +1,8 @@
 package client;
 
 import server.ClientCommunicationHandler;
-import server.DBServer;
 import shared.ActiveSession;
 import shared.Permission;
-import shared.ServerResponse;
 import shared.User;
 
 /**

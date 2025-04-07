@@ -14,10 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
-import shared.ActiveSession;
 import shared.DataValidation;
 import shared.User;
 import shared.User.Gender;
