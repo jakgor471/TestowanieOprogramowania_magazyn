@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;

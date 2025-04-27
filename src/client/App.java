@@ -11,17 +11,17 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -35,7 +35,6 @@ import gui.EditUserPermissionPanel;
 import gui.FilteredUserListModel;
 import gui.InfoPanel;
 import gui.PermissionListModel;
-import gui.PermissionTableModel;
 import server.ClientCommunicationHandler;
 import server.DBServer;
 import shared.Permission;
@@ -266,7 +265,7 @@ public class App {
 		JPanel entcpl = new JPanel();
 		entcpl.setLayout(new BoxLayout(entcpl, BoxLayout.Y_AXIS));
 		
-		JButton filterEnt = new JButton("Zapomnieni");
+		JButton filterEnt = new JButton("Filtruj");
 		filterEnt.setToolTipText("Filter the entitiy list, hold Shift to clear the filter");
 		JTextField findtext = new JTextField();
 		findtext.setToolTipText("Text to search for");
@@ -294,11 +293,45 @@ public class App {
 		
 		filterEnt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				userListModel.setShowForgotten(!userListModel.isShowForgotten());
-				filterEnt.setText(userListModel.isShowForgotten() ? "Aktywni" : "Zapomnieni");
-				userListModel.filter();
+				JDialog subframe = new JDialog(frame, "Filtruj");
 				
-				userList.clearSelection();
+				JPanel panel = new JPanel();
+				BoxLayout layout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+				panel.setLayout(layout);
+				
+				EditUserPermissionPanel p = new EditUserPermissionPanel();
+				
+				final HashSet<Permission> perms = userListModel.getPermissions();
+				
+				p.setUprawnienia(perms);
+				
+				panel.add(new JLabel("Filtruj uprawnienia"));
+				panel.add(p);
+				panel.add(new JLabel("Status użytkownika"));
+				
+				JCheckBox checkBox = new JCheckBox("Tylko zapomnieni");
+				panel.add(checkBox);
+				
+				checkBox.setSelected(userListModel.isShowForgotten());
+				
+				JButton filtruj = new JButton("Filtruj");
+				
+				filtruj.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent ae) {
+						userListModel.setShowForgotten(checkBox.isSelected());
+						userListModel.setPermissions(p.getUprawnienia());
+						userListModel.filter();
+					}
+				});
+				
+				panel.add(filtruj);
+				
+				subframe.getContentPane().add(new JScrollPane(panel));
+				
+				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				subframe.setSize(300, 320);
+				subframe.setLocation(frame.getLocation());
+				subframe.setVisible(true);
 			}
 		});
 		

@@ -1,11 +1,9 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
 import java.net.URL;
 import java.util.HashSet;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;

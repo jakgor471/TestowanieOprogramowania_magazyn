@@ -1,10 +1,12 @@
 package gui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
 
+import shared.Permission;
 import shared.User;
 
 public class FilteredUserListModel extends AbstractListModel<User> {
@@ -12,10 +14,24 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 	private ArrayList<User> filtered;
 	private String criterium;
 	private boolean showForgotten;
+	private HashSet<Permission> perms;
 	
 	public FilteredUserListModel(List<User> users) {
 		this.users = users;
 		filtered = new ArrayList<User>();
+		filter();
+		
+		perms = new HashSet<Permission>();
+		for(Permission p : Permission.values())
+			perms.add(p);
+	}
+	
+	public HashSet<Permission> getPermissions(){
+		return perms;
+	}
+	
+	public void setPermissions(HashSet<Permission> perms) {
+		this.perms = perms;
 		filter();
 	}
 	
@@ -32,21 +48,21 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 	public void filter() {
 		filtered.clear();
 		
-		if(criterium == null || criterium.isEmpty()) {
-			for(User u : users) {
-				if(u.isForgotten() ^ showForgotten)
-					continue;
-				filtered.add(u);
-			}
-			
-			reload();
-			return;
-		}
+		boolean filter = !(criterium == null || criterium.isEmpty());
 		
 		for(User u : users) {
 			if(u.isForgotten() ^ showForgotten)
 				continue;
-			if(u.getLogin().toLowerCase().contains(criterium) || u.getImie().toLowerCase().contains(criterium) || u.getNazwisko().toLowerCase().contains(criterium))
+			boolean critFilter = filter && (u.getLogin().toLowerCase().contains(criterium) || u.getImie().toLowerCase().contains(criterium) || u.getNazwisko().toLowerCase().contains(criterium));
+			boolean permFilter = perms == null;
+			
+			if(perms != null) {
+				for(Permission p : perms) {
+					permFilter = permFilter || u.hasPermission(p);
+				}
+			}
+			
+			if((!filter || critFilter) && permFilter)
 				filtered.add(u);
 		}
 		
