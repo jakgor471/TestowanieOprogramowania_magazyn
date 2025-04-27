@@ -1,6 +1,7 @@
 package server;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import client.ServerCommunicationHandler;
@@ -34,7 +35,7 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		if(user == null)
 			return;
 		
-		if(session == null || !session.isAdmin())
+		if(session == null || !(session.isAdmin() || session.hasPermission(Permission.UserAdd)))
 			throw new RuntimeException("Nieprawidłowe uprawnienia!");
 		
 		try {
@@ -52,19 +53,34 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		if(oldLogin == null)
 			oldLogin = user.getLogin();
 		
-		if(session == null || !session.isAdmin())
+		if(session == null || !(session.isAdmin() || session.hasPermission(Permission.UserEdit)))
 			throw new RuntimeException("Nieprawidłowe uprawnienia!");
 		
 		try {
 			server.editUser((User)user.clone(), oldLogin);
 		} catch(IllegalArgumentException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Problem bazodanowy! " + e.getMessage());
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+	
+	public void editUserPermissions(User user, HashSet<Permission> perms) {
+		if(user == null)
+			return;
+		
+		if(session == null || !(session.isAdmin() || session.hasPermission(Permission.UserPermission)))
+			throw new RuntimeException("Nieprawidłowe uprawnienia!");
+		
+		try {
+			server.editUserPermissions((User)user.clone(), (HashSet<Permission>)perms.clone());
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 	
 	public void forgetUser(User user) {
-		if(session == null || !session.isAdmin())
+		if(session == null || !(session.isAdmin() || session.hasPermission(Permission.UserForget)))
 			throw new RuntimeException("Nieprawidłowe uprawnienia!");
 		
 		try {
@@ -75,7 +91,7 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 			server.editUser(forgotten, forgotten.getLogin());
 		} catch(IllegalArgumentException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Problem bazodanowy! " + e.getMessage());
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 

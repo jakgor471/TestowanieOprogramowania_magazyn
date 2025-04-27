@@ -77,7 +77,7 @@ public class EditUserPanel extends JPanel {
 	}
 	
 	public EditUserPanel() {
-		this.setBorder(BorderFactory.createEtchedBorder());
+		//this.setBorder(BorderFactory.createEtchedBorder());
 		
 		this.setLayout(new GridBagLayout());		
 		
@@ -294,7 +294,7 @@ public class EditUserPanel extends JPanel {
 	 * @return Użytkownik lub null jeśli wartości z formularza nie spełniają warunków walidacji.
 	 */
 	public User getUzytkownik() {
-		User nowy = new User();
+		User nowy = (User)edytowanyUzytkownik.clone();
 		Adres adr = new Adres();
 		
 		if(!validateData())

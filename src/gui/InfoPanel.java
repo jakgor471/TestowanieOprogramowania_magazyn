@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.util.HashSet;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -8,6 +9,7 @@ import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLEditorKit;
 
 import shared.DataValidation;
+import shared.Permission;
 import shared.User;
 
 public class InfoPanel extends JPanel {
@@ -57,6 +59,16 @@ public class InfoPanel extends JPanel {
 		} else {
 			sb.append("<b>Data zapomnienia</b>: ").append(DataValidation.dateToString(u.getDataZapomnienia())).append("<br>");
 			sb.append("<b>Zapomniany przez</b>: ").append(u.getZapomnianyPrzez()).append("<br>");
+		}
+		
+		sb.append("<h2>Uprawnienia</h2>");
+		HashSet<Permission> perms = u.getUprawnienia();
+		if(!perms.isEmpty()) {
+			sb.append("<ul>");
+			for(Permission p : perms) {
+				sb.append("<li>").append(p.toString()).append("</li>");
+			}
+			sb.append("</ul>");
 		}
 		
 		setText(sb.toString());

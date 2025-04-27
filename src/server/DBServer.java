@@ -14,8 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import shared.DataValidation;
+import shared.Permission;
 import shared.User;
 import shared.User.Gender;
 
@@ -109,6 +111,8 @@ public class DBServer implements Closeable {
 					+ "    )\r\n"
 					+ ") adresy ON uzytkownicy.login = adresy.uzytkownikLogin;");
 			
+			PreparedStatement stmt2 = dbConn.prepareStatement("SELECT idUprawnienia FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?");
+			
 			ResultSet rs = stmt.executeQuery();
 			
 			while(rs.next()) {
@@ -135,6 +139,18 @@ public class DBServer implements Closeable {
 					u.getAdres().setUlica(rs.getString("ulica"));
 					u.getAdres().setNrPosesji(rs.getString("nrPosesji"));
 					u.getAdres().setNrLokalu(rs.getString("nrLokalu"));
+					
+					stmt2.setString(1, rs.getString("login"));
+					ResultSet rs2 = stmt2.executeQuery();
+					
+					while(rs2.next()) {
+						int uprId = rs2.getInt(1);
+						
+						if(uprId < 1 || uprId > Permission.values().length)
+							continue;
+						
+						u.addPermission(Permission.values()[uprId - 1]);
+					}
 					
 					users.add(u);
 				} catch(Exception e) {
@@ -256,6 +272,25 @@ public class DBServer implements Closeable {
 			stmt.setString(6, user.getLogin());
 			
 			stmt.executeUpdate();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void editUserPermissions(User user, HashSet<Permission> perms) {
+		try {
+			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
+			PreparedStatement stmt = dbConn.prepareStatement("DELETE FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?;");
+			stmt.setString(1, user.getLogin());
+			stmt.executeUpdate();
+			
+			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyUprawnienia VALUES(?, ?);");
+			stmt.setString(1, user.getLogin());
+			
+			for(Permission p : perms) {
+				stmt.setInt(2, p.ordinal() + 1);
+				stmt.executeUpdate();
+			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}

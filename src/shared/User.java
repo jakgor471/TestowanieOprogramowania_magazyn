@@ -1,6 +1,7 @@
 package shared;
 
 import java.util.Date;
+import java.util.HashSet;
 
 /**
  * Klasa używana do reprezentowania użytkownika i jego danych wyszczególnionych w specyfikacji projektowej.
@@ -22,11 +23,29 @@ public class User implements Cloneable{
 	private boolean zapomniany;
 	private Date dataZapomnienia;
 	private String zapomnianyPrzez;
+	private HashSet<Permission> uprawnienia;
 	
 	public User() {
 		adres = new Adres();
 		dataUrodzenia = new Date();
 		zapomniany = false;
+		uprawnienia = new HashSet<Permission>();
+	}
+	
+	public void addPermission(Permission p) {
+		uprawnienia.add(p);
+	}
+	
+	public void removePermission(Permission p) {
+		uprawnienia.remove(p);
+	}
+	
+	public boolean hasPermission(Permission p) {
+		return uprawnienia.contains(p);
+	}
+	
+	public HashSet<Permission> getUprawnienia(){
+		return uprawnienia;
 	}
 	
 	public String toString() {
@@ -46,6 +65,7 @@ public class User implements Cloneable{
 		dataUrodzenia = DataValidation.randomDate();
 		nrPesel = DataValidation.randomPesel(dataUrodzenia, plec);
 		zapomniany = true;
+		dataZapomnienia = new Date();
 	}
 	
 	public boolean isForgotten() {
@@ -219,6 +239,10 @@ public class User implements Cloneable{
 		nowy.nrTel = this.nrTel;
 		nowy.plec = this.plec;
 		nowy.hasloHash = this.hasloHash;
+		nowy.zapomniany = this.zapomniany;
+		nowy.uprawnienia = (HashSet<Permission>)this.uprawnienia.clone();
+		nowy.zapomnianyPrzez = this.zapomnianyPrzez;
+		nowy.dataZapomnienia = (Date)this.dataZapomnienia.clone();
 		
 		return nowy;
 	}
@@ -287,14 +311,14 @@ public class User implements Cloneable{
 	public static enum Gender{
 		Kobieta,
 		Mezczyzna;
-	
+		
+		private static final String[] alias = {"Kobieta", "Mężczyzna"};
+		
 		/**
 		 * @return Przyjazna nazwa.
 		 */
 		public String toString() {
-			if(this.ordinal() == 0)
-				return "Kobieta";
-			return "Mężczyzna";
+			return alias[this.ordinal()];
 		}
 	}
 }

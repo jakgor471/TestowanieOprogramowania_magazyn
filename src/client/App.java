@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.Box;
@@ -16,7 +17,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -26,10 +30,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import gui.EditUserPanel;
+import gui.EditUserPermissionPanel;
 import gui.FilteredUserListModel;
 import gui.InfoPanel;
+import gui.PermissionTableModel;
 import server.ClientCommunicationHandler;
 import server.DBServer;
+import shared.Permission;
 import shared.User;
 import shared.User.Gender;
 
@@ -115,29 +122,47 @@ public class App {
 			public void actionPerformed(ActionEvent ae) {
 				if(userList.getSelectedIndex() < 0)
 					return;
+				User u = userList.getModel().getElementAt(userList.getSelectedIndex());
 				JDialog subframe = new JDialog(frame, "Edytuj użytkownika");
 				EditUserPanel eup = new EditUserPanel();
-				subframe.getContentPane().add(new JScrollPane(eup));
+				
+				EditUserPermissionPanel perms = new EditUserPermissionPanel();
+				perms.setUprawnienia(u.getUprawnienia());
+				
+				JTabbedPane tabs = new JTabbedPane();
+				tabs.addTab("Dane", new JScrollPane(eup));
+				tabs.addTab("Uprawnienia", new JScrollPane(perms));
+				
+				subframe.getContentPane().add(tabs);
 				
 				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				subframe.setSize(400, 520);
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 				
-				eup.setUzytkownik(userList.getModel().getElementAt(userList.getSelectedIndex()));
+				eup.setUzytkownik(u);
 				eup.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae2) {
+						HashSet<Permission> editedPerms = perms.getUprawnienia();
+						
+						if(editedPerms.isEmpty() && !u.isForgotten()) {
+							JOptionPane.showMessageDialog(subframe, "Użytkownik musi posiadać przynajmniej jedno uprawnienie!", "BŁĄD!", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						
 						(new SwingWorker<Void, Void>(){
 
 							@Override
 							protected Void doInBackground() throws Exception {
 								try {
-									serverHandler.editUser(eup.getUzytkownik(), eup.getOriginalLogin());
+									User newUser = eup.getUzytkownik();
+									serverHandler.editUser(newUser, eup.getOriginalLogin());
+									serverHandler.editUserPermissions(newUser, editedPerms);
 									subframe.dispose();
 									userListModel.setUserList(serverHandler.getUsers());
 									userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
 								} catch(Exception e) {
-									JOptionPane.showMessageDialog(subframe, "Błąd przy dodawaniu użytkownika! " + e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
+									JOptionPane.showMessageDialog(subframe, "Błąd przy edytowaniu użytkownika! " + e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
 								}
 								
 								return null;
@@ -197,7 +222,7 @@ public class App {
 				if(selected) {
 					userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
 				} else
-					userInfo.setText("");
+					userInfo.setText("<body></body>");
 			}
 			
 		});
