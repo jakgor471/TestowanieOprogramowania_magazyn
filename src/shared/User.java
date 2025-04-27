@@ -242,7 +242,9 @@ public class User implements Cloneable{
 		nowy.zapomniany = this.zapomniany;
 		nowy.uprawnienia = (HashSet<Permission>)this.uprawnienia.clone();
 		nowy.zapomnianyPrzez = this.zapomnianyPrzez;
-		nowy.dataZapomnienia = (Date)this.dataZapomnienia.clone();
+		
+		if(this.zapomniany)
+			nowy.dataZapomnienia = (Date)this.dataZapomnienia.clone();
 		
 		return nowy;
 	}

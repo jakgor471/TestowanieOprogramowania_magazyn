@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.swing.JPanel;
@@ -34,6 +35,23 @@ public class InfoPanel extends JPanel {
 	public void setText(String text) {
 		textPane.setText(text);
 		textPane.setCaretPosition(0);
+	}
+	
+	public void setPermissionInfo(Permission p, ArrayList<User> users) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<h1>").append(p).append("</h1><hr>").append("<p>").append(p.getDescription()).append("</p>");
+		
+		if(users != null) {
+			sb.append("<h2>Użytkownicy posiadający to uprawnienie:</h2>");
+			
+			sb.append("<ul>");
+			for(User u : users) {
+				sb.append("<li>").append(u.getLogin()).append("</li>");
+			}
+			sb.append("</ul>");
+		}
+		
+		setText(sb.toString());
 	}
 	
 	public void setUserInfo(User u) {

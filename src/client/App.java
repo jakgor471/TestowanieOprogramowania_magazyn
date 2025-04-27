@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import gui.EditUserPanel;
 import gui.EditUserPermissionPanel;
 import gui.FilteredUserListModel;
 import gui.InfoPanel;
+import gui.PermissionListModel;
 import gui.PermissionTableModel;
 import server.ClientCommunicationHandler;
 import server.DBServer;
@@ -227,6 +229,37 @@ public class App {
 			
 		});
 		
+		JList<Permission> permList = new JList<Permission>();
+		permList.setModel(new PermissionListModel());
+		
+		permList.addListSelectionListener(new ListSelectionListener() {
+
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting())
+					return;
+				
+				boolean selected = permList.getSelectedIndex() > -1;
+				
+				if(selected) {
+					Permission p = permList.getSelectedValue();
+					
+					ArrayList<User> usersByPerm = new ArrayList<User>();
+					
+					for(User u : userListModel.getAllUsers()) {
+						if(u.hasPermission(p))
+							usersByPerm.add(u);
+					}
+					
+					userInfo.setPermissionInfo(permList.getModel().getElementAt(permList.getSelectedIndex()), usersByPerm);
+				} else
+					userInfo.setText("<body></body>");
+			}
+			
+		});
+		
+		JPanel leftPanelPerm = new JPanel(new BorderLayout());
+		leftPanelPerm.add(new JScrollPane(permList));
+		
 		JPanel leftPanel = new JPanel(new BorderLayout());
 		leftPanel.add(new JScrollPane(userList), "Center");
 		
@@ -279,44 +312,16 @@ public class App {
 		fbox2.add(editUser);
 		fbox2.add(forgetUser);
 		
-		
 		entcpl.add((Component) fbox);
 		entcpl.add((Component) fbox2);
 
 		leftPanel.add((Component) entcpl, "South");
 		
-		JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, userInfo);
+		JTabbedPane mainTabs = new JTabbedPane();
+		mainTabs.addTab("Użytkownicy", leftPanel);
+		mainTabs.addTab("Uprawnienia", leftPanelPerm);
 		
-		/*User user = new User();
-		user.setLogin("login133");
-		user.setHaslo("B@rdzo_SkomplikowaneH@$$70");
-		user.setImie("Jakub");
-		user.setNazwisko("Nowak");
-		user.setEmail("jakub.nowak@edu.uni.lodz.pl");
-		user.setNrPesel("02070803628");
-		user.setNrTel("692504256");
-		user.setPlec(Gender.Kobieta);
-		
-		user.getAdres().setKodPocztowy("95-200");
-		user.getAdres().setMiejscowosc("Pabianice");
-		user.getAdres().setNrLokalu("32");
-		user.getAdres().setNrPosesji("6/8");
-		user.getAdres().setUlica("Ostatnia");
-		
-		for(int i = 0; i < 10; ++i) {
-			user.forgetUser();
-			DataValidation.validatePesel(user.getNrPesel(), user.getDataUrodzenia(), user.getPlec());
-		}
-		
-		lsh.createSession("admin", "admin");
-		lsh.addUser(user);
-		
-		user.setLogin("haslo123");
-		user.getAdres().setMiejscowosc("Świętochłowice");
-		lsh.editUser(user, "login133");
-		
-		eup.setUzytkownik(user);*/
-		//eup.setEditable(false);
+		JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mainTabs, userInfo);
 		
 		frame.getContentPane().add(mainSplit);
 		mainSplit.setDividerLocation(275);

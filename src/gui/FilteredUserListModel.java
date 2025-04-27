@@ -57,6 +57,10 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 		return filtered;
 	}
 	
+	public List<User> getAllUsers(){
+		return users;
+	} 
+	
 	public void reload() {
 		this.fireContentsChanged(this, 0, getSize());
 	}
