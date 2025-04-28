@@ -117,28 +117,28 @@ public class DBServer implements Closeable {
 			
 			while(rs.next()) {
 				try {
-					User u = new User();
-					u.setLogin(rs.getString("login"));
-					u.setHasloHash(rs.getString("haslo"));
-					u.setImie(rs.getString("imie"));
-					u.setNazwisko(rs.getString("nazwisko"));
-					u.setNrPesel(rs.getString("nrPesel"));
-					u.setDataUrodzenia(DataValidation.stringToDate(rs.getString("dataUrodzenia")));
-					u.setPlec(Gender.values()[rs.getInt("plec")]);
-					u.setEmail(rs.getString("email"));
-					u.setNrTel(rs.getString("numerTelefonu"));
-					u.setForgotten(rs.getBoolean("zapomniany"));
+					User user = new User();
+					user.setLogin(rs.getString("login"));
+					user.setHasloHash(rs.getString("haslo"));
+					user.setImie(rs.getString("imie"));
+					user.setNazwisko(rs.getString("nazwisko"));
+					user.setNrPesel(rs.getString("nrPesel"));
+					user.setDataUrodzenia(DataValidation.stringToDate(rs.getString("dataUrodzenia")));
+					user.setPlec(Gender.values()[rs.getInt("plec")]);
+					user.setEmail(rs.getString("email"));
+					user.setNrTel(rs.getString("numerTelefonu"));
+					user.setForgotten(rs.getBoolean("zapomniany"));
 					
-					if(u.isForgotten()) {
-						u.setZapomnianyPrzez(rs.getString("zapomnianyPrzez"));
-						u.setDataZapomnienia(DataValidation.stringToDate(rs.getString("dataZapomnienia")));
+					if(user.isForgotten()) {
+						user.setZapomnianyPrzez(rs.getString("zapomnianyPrzez"));
+						user.setDataZapomnienia(DataValidation.stringToDate(rs.getString("dataZapomnienia")));
 					}
 					
-					u.getAdres().setKodPocztowy(rs.getString("kodPocztowy"));
-					u.getAdres().setMiejscowosc(rs.getString("miejscowosc"));
-					u.getAdres().setUlica(rs.getString("ulica"));
-					u.getAdres().setNrPosesji(rs.getString("nrPosesji"));
-					u.getAdres().setNrLokalu(rs.getString("nrLokalu"));
+					user.getAdres().setKodPocztowy(rs.getString("kodPocztowy"));
+					user.getAdres().setMiejscowosc(rs.getString("miejscowosc"));
+					user.getAdres().setUlica(rs.getString("ulica"));
+					user.getAdres().setNrPosesji(rs.getString("nrPosesji"));
+					user.getAdres().setNrLokalu(rs.getString("nrLokalu"));
 					
 					stmt2.setString(1, rs.getString("login"));
 					ResultSet rs2 = stmt2.executeQuery();
@@ -149,10 +149,10 @@ public class DBServer implements Closeable {
 						if(uprId < 1 || uprId > Permission.values().length)
 							continue;
 						
-						u.addPermission(Permission.values()[uprId - 1]);
+						user.addPermission(Permission.values()[uprId - 1]);
 					}
 					
-					users.add(u);
+					users.add(user);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}

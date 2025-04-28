@@ -47,6 +47,11 @@ public class App {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		
+		
+		/*
+		 * TODO: komunikat gdy uprawnienia zostana zmienione, uzytkownikom zapomnianym sa odbierane uprawnienia,
+		 * refaktoring nazw zmiennych (zeby nie byly jednoliterowe :) )
+		 */
 		DBServer serwer = new DBServer();
 		ClientCommunicationHandler serverHandler = new ClientCommunicationHandler(serwer);
 		serverHandler.createSession("admin", "admin");
