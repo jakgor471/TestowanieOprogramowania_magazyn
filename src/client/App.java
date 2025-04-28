@@ -92,7 +92,7 @@ public class App {
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 				
-				eup.setUzytkownik(user);
+				//eup.setUzytkownik(user);
 				eup.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae2) {
 						(new SwingWorker<Void, Void>(){

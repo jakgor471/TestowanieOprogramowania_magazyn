@@ -92,7 +92,7 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 
 	@Override
 	public User getElementAt(int index) {
-		return filtered.get(index);
+		return filtered.get(Math.min(index, getSize() - 1));
 	}
 
 	public boolean isShowForgotten() {
