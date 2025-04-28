@@ -32,6 +32,8 @@ public class EditUserPermissionPanel extends JPanel {
 		perms.setShowGrid(false);
 		
 		this.add(perms);
+		
+		this.setMaximumSize(perms.getMaximumSize());
 	}
 	
 	public void setUprawnienia(HashSet<Permission> perms) {

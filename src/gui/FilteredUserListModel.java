@@ -10,11 +10,13 @@ import shared.Permission;
 import shared.User;
 
 public class FilteredUserListModel extends AbstractListModel<User> {
+	private static final long serialVersionUID = 1L;
 	private List<User> users;
 	private ArrayList<User> filtered;
 	private String criterium;
 	private boolean showForgotten;
 	private HashSet<Permission> perms;
+	private boolean allPerms;
 	
 	public FilteredUserListModel(List<User> users) {
 		this.users = users;
@@ -54,15 +56,17 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 			if(u.isForgotten() ^ showForgotten)
 				continue;
 			boolean critFilter = filter && (u.getLogin().toLowerCase().contains(criterium) || u.getImie().toLowerCase().contains(criterium) || u.getNazwisko().toLowerCase().contains(criterium));
-			boolean permFilter = perms == null;
+			boolean permFilterOr = perms == null;
+			boolean permFilterAnd = true;
 			
 			if(perms != null) {
 				for(Permission p : perms) {
-					permFilter = permFilter || u.hasPermission(p);
+					permFilterOr = permFilterOr || u.hasPermission(p);
+					permFilterAnd = permFilterAnd && u.hasPermission(p);
 				}
 			}
 			
-			if((!filter || critFilter) && permFilter)
+			if((!filter || critFilter) && ((permFilterOr && !allPerms || permFilterAnd && allPerms) || perms.isEmpty() && u.getUprawnienia().isEmpty()))
 				filtered.add(u);
 		}
 		
@@ -97,6 +101,14 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 
 	public void setShowForgotten(boolean showForgotten) {
 		this.showForgotten = showForgotten;
+	}
+
+	public boolean isAllPerms() {
+		return allPerms;
+	}
+
+	public void setAllPerms(boolean allPerms) {
+		this.allPerms = allPerms;
 	}
 
 }

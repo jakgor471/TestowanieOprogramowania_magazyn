@@ -293,6 +293,8 @@ public class EditUserPanel extends JPanel {
 	 * @return Użytkownik lub null jeśli wartości z formularza nie spełniają warunków walidacji.
 	 */
 	public User getUzytkownik() {
+		if(edytowanyUzytkownik == null)
+			edytowanyUzytkownik = new User();
 		User nowy = (User)edytowanyUzytkownik.clone();
 		Adres adr = new Adres();
 		

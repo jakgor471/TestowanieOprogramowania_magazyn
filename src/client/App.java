@@ -77,7 +77,7 @@ public class App {
 		user.getAdres().setNrPosesji("6/8");
 		user.getAdres().setUlica("Ostatnia");
 		
-		user.forgetUser();
+		//user.forgetUser();
 		
 		JButton addUser = new JButton("Dodaj");
 		addUser.setEnabled(true);
@@ -307,6 +307,8 @@ public class App {
 				
 				panel.add(new JLabel("Filtruj uprawnienia"));
 				panel.add(p);
+				JCheckBox checkBox2 = new JCheckBox("Musi posiadać WSZYSTKIE");
+				panel.add(checkBox2);
 				panel.add(new JLabel("Status użytkownika"));
 				
 				JCheckBox checkBox = new JCheckBox("Tylko zapomnieni");
@@ -319,6 +321,7 @@ public class App {
 				filtruj.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae) {
 						userListModel.setShowForgotten(checkBox.isSelected());
+						userListModel.setAllPerms(checkBox2.isSelected());
 						userListModel.setPermissions(p.getUprawnienia());
 						userListModel.filter();
 					}
@@ -329,7 +332,7 @@ public class App {
 				subframe.getContentPane().add(new JScrollPane(panel));
 				
 				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				subframe.setSize(300, 320);
+				subframe.setSize(300, 250);
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 			}
