@@ -49,7 +49,7 @@ public class App {
 		
 		
 		/*
-		 * TODO: komunikat gdy uprawnienia zostana zmienione, uzytkownikom zapomnianym sa odbierane uprawnienia,
+		 * TODO: komunikat gdy uprawnienia zostana zmienione ZROBIONE, uzytkownikom zapomnianym sa odbierane uprawnienia ZROBIONE,
 		 * refaktoring nazw zmiennych (zeby nie byly jednoliterowe :) )
 		 */
 		DBServer serwer = new DBServer();
@@ -68,13 +68,13 @@ public class App {
 		
 		User user = new User();
 		user.setLogin("login56");
-		user.setHaslo("B@rdzo_SkomplikowaneH@$$70");
-		user.setImie("Jakub");
-		user.setNazwisko("Nowak");
+		user.setPassword("B@rdzo_SkomplikowaneH@$$70");
+		user.setName("Jakub");
+		user.setLastname("Nowak");
 		user.setEmail("jakub.nowak@edu.uni.lodz.pl");
 		user.setNrPesel("02070803628");
 		user.setNrTel("692504256");
-		user.setPlec(Gender.Kobieta);
+		user.setGender(Gender.Kobieta);
 		
 		user.getAdres().setKodPocztowy("95-200");
 		user.getAdres().setMiejscowosc("Pabianice");
@@ -108,6 +108,7 @@ public class App {
 									serverHandler.addUser(eup.getUzytkownik());
 									subframe.dispose();
 									userListModel.setUserList(serverHandler.getUsers());
+									userList.setModel(userListModel);
 								} catch(Exception e) {
 									JOptionPane.showMessageDialog(subframe, "Błąd przy dodawaniu użytkownika! " + e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
 									e.printStackTrace();
@@ -128,12 +129,12 @@ public class App {
 			public void actionPerformed(ActionEvent ae) {
 				if(userList.getSelectedIndex() < 0)
 					return;
-				User u = userList.getModel().getElementAt(userList.getSelectedIndex());
+				User selectedUser = userList.getModel().getElementAt(userList.getSelectedIndex());
 				JDialog subframe = new JDialog(frame, "Edytuj użytkownika");
 				EditUserPanel eup = new EditUserPanel();
 				
 				EditUserPermissionPanel perms = new EditUserPermissionPanel();
-				perms.setUprawnienia(u.getUprawnienia());
+				perms.setPermissions(selectedUser.getPermissions());
 				
 				JTabbedPane tabs = new JTabbedPane();
 				tabs.addTab("Dane", new JScrollPane(eup));
@@ -146,12 +147,12 @@ public class App {
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 				
-				eup.setUzytkownik(u);
+				eup.setUzytkownik(selectedUser);
 				eup.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae2) {
-						HashSet<Permission> editedPerms = perms.getUprawnienia();
+						HashSet<Permission> editedPerms = perms.getPermissions();
 						
-						if(editedPerms.isEmpty() && !u.isForgotten()) {
+						if(editedPerms.isEmpty() && !selectedUser.isForgotten()) {
 							JOptionPane.showMessageDialog(subframe, "Użytkownik musi posiadać przynajmniej jedno uprawnienie!", "BŁĄD!", JOptionPane.ERROR_MESSAGE);
 							return;
 						}
@@ -163,10 +164,16 @@ public class App {
 								try {
 									User newUser = eup.getUzytkownik();
 									serverHandler.editUser(newUser, eup.getOriginalLogin());
-									serverHandler.editUserPermissions(newUser, editedPerms);
+									serverHandler.editUserPermissions(newUser, perms.getPermissions());
 									subframe.dispose();
 									userListModel.setUserList(serverHandler.getUsers());
-									userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
+									//userList.setModel(userListModel);
+									
+									if(userList.getSelectedIndex() > -1)
+										userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
+									
+									if(!perms.getPermissions().equals(selectedUser.getPermissions()))
+										JOptionPane.showMessageDialog(subframe, "Zmieniono uprawnienia użytkownika.", "INFO", JOptionPane.INFORMATION_MESSAGE);
 								} catch(Exception e) {
 									JOptionPane.showMessageDialog(subframe, "Błąd przy edytowaniu użytkownika! " + e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
 								}
@@ -200,7 +207,10 @@ public class App {
 						try {
 							serverHandler.forgetUser(selected);
 							userListModel.setUserList(serverHandler.getUsers());
-							userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
+							userList.setModel(userListModel);
+							if(userList.getSelectedIndex() > -1)
+								userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
+							
 						} catch(Exception e) {
 							JOptionPane.showMessageDialog(frame, "Błąd przy zapominaniu użytkownika! " + e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
 						}
@@ -209,8 +219,6 @@ public class App {
 					}
 					
 				}).execute();
-				
-				userInfo.setUserInfo(userList.getModel().getElementAt(userList.getSelectedIndex()));
 			}
 		});
 		
@@ -308,7 +316,7 @@ public class App {
 				
 				final HashSet<Permission> perms = userListModel.getPermissions();
 				
-				p.setUprawnienia(perms);
+				p.setPermissions(perms);
 				
 				panel.add(new JLabel("Filtruj uprawnienia"));
 				panel.add(p);
@@ -327,7 +335,7 @@ public class App {
 					public void actionPerformed(ActionEvent ae) {
 						userListModel.setShowForgotten(checkBox.isSelected());
 						userListModel.setAllPerms(checkBox2.isSelected());
-						userListModel.setPermissions(p.getUprawnienia());
+						userListModel.setPermissions(p.getPermissions());
 						userListModel.filter();
 					}
 				});

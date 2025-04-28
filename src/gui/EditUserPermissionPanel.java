@@ -12,9 +12,8 @@ import shared.Permission;
 
 public class EditUserPermissionPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static final URL errorIcon = EditUserPanel.class.getResource("/images/exclamation.png");
 	
-	private HashSet<Permission> edytowaneUprawnienia;
+	private HashSet<Permission> editedPerms;
 	private PermissionTableModel model;
 	
 	public EditUserPermissionPanel() {
@@ -36,12 +35,12 @@ public class EditUserPermissionPanel extends JPanel {
 		this.setMaximumSize(perms.getMaximumSize());
 	}
 	
-	public void setUprawnienia(HashSet<Permission> perms) {
-		this.edytowaneUprawnienia = (HashSet<Permission>)perms.clone();
-		this.model.setPermissions(edytowaneUprawnienia);
+	public void setPermissions(HashSet<Permission> perms) {
+		this.editedPerms = (HashSet<Permission>)perms.clone();
+		this.model.setPermissions(editedPerms);
 	}
 	
-	public HashSet<Permission> getUprawnienia(){
-		return edytowaneUprawnienia;
+	public HashSet<Permission> getPermissions(){
+		return editedPerms;
 	}
 }

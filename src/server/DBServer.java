@@ -119,19 +119,19 @@ public class DBServer implements Closeable {
 				try {
 					User user = new User();
 					user.setLogin(rs.getString("login"));
-					user.setHasloHash(rs.getString("haslo"));
-					user.setImie(rs.getString("imie"));
-					user.setNazwisko(rs.getString("nazwisko"));
+					user.setPasswordHash(rs.getString("haslo"));
+					user.setName(rs.getString("imie"));
+					user.setLastname(rs.getString("nazwisko"));
 					user.setNrPesel(rs.getString("nrPesel"));
-					user.setDataUrodzenia(DataValidation.stringToDate(rs.getString("dataUrodzenia")));
-					user.setPlec(Gender.values()[rs.getInt("plec")]);
+					user.setBirthDate(DataValidation.stringToDate(rs.getString("dataUrodzenia")));
+					user.setGender(Gender.values()[rs.getInt("plec")]);
 					user.setEmail(rs.getString("email"));
 					user.setNrTel(rs.getString("numerTelefonu"));
 					user.setForgotten(rs.getBoolean("zapomniany"));
 					
 					if(user.isForgotten()) {
-						user.setZapomnianyPrzez(rs.getString("zapomnianyPrzez"));
-						user.setDataZapomnienia(DataValidation.stringToDate(rs.getString("dataZapomnienia")));
+						user.setForgottenBy(rs.getString("zapomnianyPrzez"));
+						user.setForgottenDate(DataValidation.stringToDate(rs.getString("dataZapomnienia")));
 					}
 					
 					user.getAdres().setKodPocztowy(rs.getString("kodPocztowy"));
@@ -144,12 +144,12 @@ public class DBServer implements Closeable {
 					ResultSet rs2 = stmt2.executeQuery();
 					
 					while(rs2.next()) {
-						int uprId = rs2.getInt(1);
+						int idUprawnienia = rs2.getInt(1);
 						
-						if(uprId < 1 || uprId > Permission.values().length)
+						if(idUprawnienia < 1 || idUprawnienia > Permission.values().length)
 							continue;
 						
-						user.addPermission(Permission.values()[uprId - 1]);
+						user.addPermission(Permission.values()[idUprawnienia - 1]);
 					}
 					
 					users.add(user);
@@ -166,42 +166,42 @@ public class DBServer implements Closeable {
 	
 	/**
 	 * 
-	 * @param uzytkownik Użytkownik do dodania do bazy danych.
+	 * @param user Użytkownik do dodania do bazy danych.
 	 * @throws IllegalArgumentException Jeśli login użytkownika nie jest unikalny w bazie danych.
 	 */
-	public void addUser(User uzytkownik) throws IllegalArgumentException{
-		DataValidation.validatePesel(uzytkownik.getNrPesel(), uzytkownik.getDataUrodzenia(), uzytkownik.getPlec());
-		DataValidation.validateEmail(uzytkownik.getEmail());
-		DataValidation.validateNrTel(uzytkownik.getNrTel());
+	public void addUser(User user) throws IllegalArgumentException{
+		DataValidation.validatePesel(user.getNrPesel(), user.getBirthDate(), user.getGender());
+		DataValidation.validateEmail(user.getEmail());
+		DataValidation.validateNrTel(user.getNrTel());
 		
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement("SELECT Count(login) FROM uzytkownicy WHERE login = ?;");
-			stmt.setString(1, uzytkownik.getLogin());
+			stmt.setString(1, user.getLogin());
 			
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next() && rs.getInt(1) > 0)
 				throw new IllegalArgumentException("Nieunikalny login użytkownika!");
 			
 			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicy (login, haslo, imie, nazwisko, nrPesel, dataUrodzenia, plec, email, numerTelefonu, zapomniany) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-			stmt.setString(1, uzytkownik.getLogin());
-			stmt.setString(2, uzytkownik.getHasloHash());
-			stmt.setString(3, uzytkownik.getImie());
-			stmt.setString(4, uzytkownik.getNazwisko());
-			stmt.setString(5, uzytkownik.getNrPesel());
-			stmt.setString(6, DataValidation.dateToSqlString(uzytkownik.getDataUrodzenia()));
-			stmt.setInt(7, uzytkownik.getPlec().ordinal());
-			stmt.setString(8, uzytkownik.getEmail());
-			stmt.setString(9, uzytkownik.getNrTel());
-			stmt.setBoolean(10, uzytkownik.isForgotten());
+			stmt.setString(1, user.getLogin());
+			stmt.setString(2, user.getPasswordHash());
+			stmt.setString(3, user.getName());
+			stmt.setString(4, user.getLastname());
+			stmt.setString(5, user.getNrPesel());
+			stmt.setString(6, DataValidation.dateToSqlString(user.getBirthDate()));
+			stmt.setInt(7, user.getGender().ordinal());
+			stmt.setString(8, user.getEmail());
+			stmt.setString(9, user.getNrTel());
+			stmt.setBoolean(10, user.isForgotten());
 			
 			stmt.executeUpdate();
 			
 			stmt = dbConn.prepareStatement("INSERT INTO adresy (miejscowosc, kodPocztowy, ulica, nrPosesji, nrLokalu) VALUES (?, ?, ?, ?, ?);");
-			stmt.setString(1, uzytkownik.getAdres().getMiejscowosc());
-			stmt.setString(2, uzytkownik.getAdres().getKodPocztowy());
-			stmt.setString(3, uzytkownik.getAdres().getUlica());
-			stmt.setString(4, uzytkownik.getAdres().getNrPosesji());
-			stmt.setString(5, uzytkownik.getAdres().getNrLokalu());
+			stmt.setString(1, user.getAdres().getMiejscowosc());
+			stmt.setString(2, user.getAdres().getKodPocztowy());
+			stmt.setString(3, user.getAdres().getUlica());
+			stmt.setString(4, user.getAdres().getNrPosesji());
+			stmt.setString(5, user.getAdres().getNrLokalu());
 			
 			stmt.executeUpdate();
 			
@@ -210,14 +210,14 @@ public class DBServer implements Closeable {
 				int id = rs.getInt(1);
 				
 				stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyAdresy (uzytkownikLogin, adresId) VALUES (?, ?);");
-				stmt.setString(1, uzytkownik.getLogin());
+				stmt.setString(1, user.getLogin());
 				stmt.setInt(2, id);
 				
 				stmt.executeUpdate();
 			}
 			
 			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyUprawnienia VALUES (?, 1);");
-			stmt.setString(1, uzytkownik.getLogin());
+			stmt.setString(1, user.getLogin());
 			stmt.executeUpdate();
 			
 		} catch(SQLException e) {
@@ -226,7 +226,7 @@ public class DBServer implements Closeable {
 	}
 	
 	public void editUser(User user, String oldLogin) throws IllegalArgumentException {
-		DataValidation.validatePesel(user.getNrPesel(), user.getDataUrodzenia(), user.getPlec());
+		DataValidation.validatePesel(user.getNrPesel(), user.getBirthDate(), user.getGender());
 		DataValidation.validateEmail(user.getEmail());
 		DataValidation.validateNrTel(user.getNrTel());
 		
@@ -249,19 +249,19 @@ public class DBServer implements Closeable {
 			
 			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, haslo = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ?, zapomniany = ?, dataZapomnienia = ?, zapomnianyPrzez = ? WHERE login = ?;");
 			stmt.setString(1, user.getLogin());
-			stmt.setString(2, user.getHasloHash());
-			stmt.setString(3, user.getImie());
-			stmt.setString(4, user.getNazwisko());
+			stmt.setString(2, user.getPasswordHash());
+			stmt.setString(3, user.getName());
+			stmt.setString(4, user.getLastname());
 			stmt.setString(5, user.getNrPesel());
-			stmt.setString(6, DataValidation.dateToSqlString(user.getDataUrodzenia()));
-			stmt.setInt(7, user.getPlec().ordinal());
+			stmt.setString(6, DataValidation.dateToSqlString(user.getBirthDate()));
+			stmt.setInt(7, user.getGender().ordinal());
 			stmt.setString(8, user.getEmail());
 			stmt.setString(9, user.getNrTel());
 			stmt.setBoolean(10, user.isForgotten());
 			
 			if(user.isForgotten()) {
-				stmt.setString(11, DataValidation.dateToSqlString(user.getDataZapomnienia()));
-				stmt.setString(12, user.getZapomnianyPrzez());
+				stmt.setString(11, DataValidation.dateToSqlString(user.getForgottenDate()));
+				stmt.setString(12, user.getForgottenBy());
 			}
 			
 			stmt.setString(13, oldLogin);

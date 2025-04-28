@@ -44,7 +44,7 @@ public class User implements Cloneable{
 		return uprawnienia.contains(p);
 	}
 	
-	public HashSet<Permission> getUprawnienia(){
+	public HashSet<Permission> getPermissions(){
 		return uprawnienia;
 	}
 	
@@ -93,28 +93,28 @@ public class User implements Cloneable{
 	/**
 	 * @return Imię.
 	 */
-	public String getImie() {
+	public String getName() {
 		return imie;
 	}
 
 	/**
 	 * @param imie Imię do ustawienia.
 	 */
-	public void setImie(String imie) {
+	public void setName(String imie) {
 		this.imie = imie;
 	}
 
 	/**
 	 * @return Nazwisko.
 	 */
-	public String getNazwisko() {
+	public String getLastname() {
 		return nazwisko;
 	}
 
 	/**
 	 * @param nazwisko Nazwisko do ustawienia.
 	 */
-	public void setNazwisko(String nazwisko) {
+	public void setLastname(String nazwisko) {
 		this.nazwisko = nazwisko;
 	}
 
@@ -149,28 +149,28 @@ public class User implements Cloneable{
 	/**
 	 * @return Data urodzenia.
 	 */
-	public Date getDataUrodzenia() {
+	public Date getBirthDate() {
 		return dataUrodzenia;
 	}
 
 	/**
 	 * @param dataUrodzenia Data urodzenia do ustawienia.
 	 */
-	public void setDataUrodzenia(Date dataUrodzenia) {
+	public void setBirthDate(Date dataUrodzenia) {
 		this.dataUrodzenia = dataUrodzenia;
 	}
 
 	/**
 	 * @return Płeć.
 	 */
-	public Gender getPlec() {
+	public Gender getGender() {
 		return plec;
 	}
 
 	/**
 	 * @param plec Płeć do ustawienia.
 	 */
-	public void setPlec(Gender plec) {
+	public void setGender(Gender plec) {
 		this.plec = plec;
 	}
 
@@ -199,31 +199,31 @@ public class User implements Cloneable{
 		this.nrTel = nrTel;
 	}
 	
-	public String getHasloHash() {
+	public String getPasswordHash() {
 		return hasloHash;
 	}
 
-	public void setHasloHash(String hasloHash) {
+	public void setPasswordHash(String hasloHash) {
 		this.hasloHash = hasloHash;
 	}
 	
-	public void setHaslo(String haslo) {
+	public void setPassword(String haslo) {
 		this.hasloHash = DataValidation.hashPassword(haslo);
 	}
 
-	public Date getDataZapomnienia() {
+	public Date getForgottenDate() {
 		return dataZapomnienia;
 	}
 
-	public void setDataZapomnienia(Date dataZapomnienia) {
+	public void setForgottenDate(Date dataZapomnienia) {
 		this.dataZapomnienia = dataZapomnienia;
 	}
 
-	public String getZapomnianyPrzez() {
+	public String getForgottenBy() {
 		return zapomnianyPrzez;
 	}
 
-	public void setZapomnianyPrzez(String zapomnianyPrzez) {
+	public void setForgottenBy(String zapomnianyPrzez) {
 		this.zapomnianyPrzez = zapomnianyPrzez;
 	}
 

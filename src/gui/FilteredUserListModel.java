@@ -24,8 +24,8 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 		filter();
 		
 		perms = new HashSet<Permission>();
-		for(Permission p : Permission.values())
-			perms.add(p);
+		for(Permission permission : Permission.values())
+			perms.add(permission);
 	}
 	
 	public HashSet<Permission> getPermissions(){
@@ -52,22 +52,22 @@ public class FilteredUserListModel extends AbstractListModel<User> {
 		
 		boolean filter = !(criterium == null || criterium.isEmpty());
 		
-		for(User u : users) {
-			if(u.isForgotten() ^ showForgotten)
+		for(User user : users) {
+			if(user.isForgotten() ^ showForgotten)
 				continue;
-			boolean critFilter = filter && (u.getLogin().toLowerCase().contains(criterium) || u.getImie().toLowerCase().contains(criterium) || u.getNazwisko().toLowerCase().contains(criterium));
+			boolean critFilter = filter && (user.getLogin().toLowerCase().contains(criterium) || user.getName().toLowerCase().contains(criterium) || user.getLastname().toLowerCase().contains(criterium));
 			boolean permFilterOr = perms == null;
 			boolean permFilterAnd = true;
 			
 			if(perms != null) {
-				for(Permission p : perms) {
-					permFilterOr = permFilterOr || u.hasPermission(p);
-					permFilterAnd = permFilterAnd && u.hasPermission(p);
+				for(Permission permission : perms) {
+					permFilterOr = permFilterOr || user.hasPermission(permission);
+					permFilterAnd = permFilterAnd && user.hasPermission(permission);
 				}
 			}
 			
-			if((!filter || critFilter) && ((permFilterOr && !allPerms || permFilterAnd && allPerms) || perms.isEmpty() && u.getUprawnienia().isEmpty()))
-				filtered.add(u);
+			if((!filter || critFilter) && ((permFilterOr && !allPerms || permFilterAnd && allPerms) || perms.isEmpty() && user.getPermissions().isEmpty()))
+				filtered.add(user);
 		}
 		
 		reload();

@@ -16,8 +16,8 @@ public class PermissionTableModel extends AbstractTableModel{
 	public PermissionTableModel() {
 	}
 	
-	public void setPermissions(HashSet<Permission> p) {
-		this.perms = p;
+	public void setPermissions(HashSet<Permission> perms) {
+		this.perms = perms;
 		this.fireTableDataChanged();
 	}
 	
@@ -51,9 +51,8 @@ public class PermissionTableModel extends AbstractTableModel{
 	public void setValueAt(Object val, int row, int col) {
 		if (col != 0)
 			return;
-		boolean b = ((Boolean)val).booleanValue();
-		
-		if(b) {
+
+		if(((Boolean)val).booleanValue()) {
 			perms.add(Permission.values()[row]);
 			return;
 		}

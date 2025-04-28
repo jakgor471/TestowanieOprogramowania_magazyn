@@ -86,9 +86,10 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		try {
 			User forgotten = (User)user.clone();
 			forgotten.forgetUser();
-			forgotten.setZapomnianyPrzez(session.getLogin());
-			forgotten.setDataZapomnienia(new Date());
+			forgotten.setForgottenBy(session.getLogin());
+			forgotten.setForgottenDate(new Date());
 			server.editUser(forgotten, forgotten.getLogin());
+			server.editUserPermissions(user, new HashSet<Permission>());
 		} catch(IllegalArgumentException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());

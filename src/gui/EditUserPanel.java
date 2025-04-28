@@ -33,10 +33,10 @@ public class EditUserPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final URL errorIcon = EditUserPanel.class.getResource("/images/exclamation.png");
 	
-	private User edytowanyUzytkownik;
+	private User editedUser;
 	private String originalLogin;
 	
-	private EnumMap<Fields, InputIconPair> pola;
+	private EnumMap<Fields, InputIconPair> fields;
 	private ArrayList<ActionListener> onClick;
 	
 	private static class InputIconPair{
@@ -70,7 +70,7 @@ public class EditUserPanel extends JPanel {
 		
 		pair.icon = icon;
 		
-		pola.put(field, pair);
+		fields.put(field, pair);
 		
 		return pair;
 	}
@@ -85,7 +85,7 @@ public class EditUserPanel extends JPanel {
 		gbc.insets = new Insets(5, 0, 0, 5);
 		
 		InputIconPair nowe = null;
-		pola = new EnumMap<>(Fields.class);
+		fields = new EnumMap<>(Fields.class);
 		onClick = new ArrayList<ActionListener>();
 		
 		gbc.gridy = 0;
@@ -267,24 +267,24 @@ public class EditUserPanel extends JPanel {
 	 * @param uzytkownik Użytkownik, którego dane mają być edytowane.
 	 */
 	public void setUzytkownik(User uzytkownik) {
-		this.edytowanyUzytkownik = (User)uzytkownik.clone();
+		this.editedUser = (User)uzytkownik.clone();
 		
-		originalLogin = edytowanyUzytkownik.getLogin();
+		originalLogin = editedUser.getLogin();
 		
-		((JTextField)pola.get(Fields.KodPocztowy).input).setText(edytowanyUzytkownik.getAdres().getKodPocztowy());
-		((JTextField)pola.get(Fields.Miejscowosc).input).setText(edytowanyUzytkownik.getAdres().getMiejscowosc());
-		((JTextField)pola.get(Fields.NrLokalu).input).setText(edytowanyUzytkownik.getAdres().getNrLokalu());
-		((JTextField)pola.get(Fields.NrPosesji).input).setText(edytowanyUzytkownik.getAdres().getNrPosesji());
-		((JTextField)pola.get(Fields.Ulica).input).setText(edytowanyUzytkownik.getAdres().getUlica());
+		((JTextField)fields.get(Fields.KodPocztowy).input).setText(editedUser.getAdres().getKodPocztowy());
+		((JTextField)fields.get(Fields.Miejscowosc).input).setText(editedUser.getAdres().getMiejscowosc());
+		((JTextField)fields.get(Fields.NrLokalu).input).setText(editedUser.getAdres().getNrLokalu());
+		((JTextField)fields.get(Fields.NrPosesji).input).setText(editedUser.getAdres().getNrPosesji());
+		((JTextField)fields.get(Fields.Ulica).input).setText(editedUser.getAdres().getUlica());
 		
-		((JTextField)pola.get(Fields.Login).input).setText(edytowanyUzytkownik.getLogin());
-		((JTextField)pola.get(Fields.Imie).input).setText(edytowanyUzytkownik.getImie());
-		((JTextField)pola.get(Fields.Nazwisko).input).setText(edytowanyUzytkownik.getNazwisko());
-		((JTextField)pola.get(Fields.NrPesel).input).setText(edytowanyUzytkownik.getNrPesel());
-		((JTextField)pola.get(Fields.DataUr).input).setText(DataValidation.dateToString(edytowanyUzytkownik.getDataUrodzenia()));
-		((JComboBox<User.Gender>)pola.get(Fields.Plec).input).setSelectedItem(edytowanyUzytkownik.getPlec());
-		((JTextField)pola.get(Fields.Email).input).setText(edytowanyUzytkownik.getEmail());
-		((JTextField)pola.get(Fields.NrTel).input).setText(edytowanyUzytkownik.getNrTel());
+		((JTextField)fields.get(Fields.Login).input).setText(editedUser.getLogin());
+		((JTextField)fields.get(Fields.Imie).input).setText(editedUser.getName());
+		((JTextField)fields.get(Fields.Nazwisko).input).setText(editedUser.getLastname());
+		((JTextField)fields.get(Fields.NrPesel).input).setText(editedUser.getNrPesel());
+		((JTextField)fields.get(Fields.DataUr).input).setText(DataValidation.dateToString(editedUser.getBirthDate()));
+		((JComboBox<User.Gender>)fields.get(Fields.Plec).input).setSelectedItem(editedUser.getGender());
+		((JTextField)fields.get(Fields.Email).input).setText(editedUser.getEmail());
+		((JTextField)fields.get(Fields.NrTel).input).setText(editedUser.getNrTel());
 	}
 	
 	/**
@@ -293,30 +293,30 @@ public class EditUserPanel extends JPanel {
 	 * @return Użytkownik lub null jeśli wartości z formularza nie spełniają warunków walidacji.
 	 */
 	public User getUzytkownik() {
-		if(edytowanyUzytkownik == null)
-			edytowanyUzytkownik = new User();
-		User nowy = (User)edytowanyUzytkownik.clone();
+		if(editedUser == null)
+			editedUser = new User();
+		User nowy = (User)editedUser.clone();
 		Adres adr = new Adres();
 		
 		if(!validateData())
 			return null;
 		
 		try {
-			adr.setKodPocztowy(((JTextField)pola.get(Fields.KodPocztowy).input).getText());
-			adr.setMiejscowosc(((JTextField)pola.get(Fields.Miejscowosc).input).getText());
-			adr.setNrLokalu(((JTextField)pola.get(Fields.NrLokalu).input).getText());
-			adr.setNrPosesji(((JTextField)pola.get(Fields.NrPosesji).input).getText());
-			adr.setUlica(((JTextField)pola.get(Fields.Ulica).input).getText());
+			adr.setKodPocztowy(((JTextField)fields.get(Fields.KodPocztowy).input).getText());
+			adr.setMiejscowosc(((JTextField)fields.get(Fields.Miejscowosc).input).getText());
+			adr.setNrLokalu(((JTextField)fields.get(Fields.NrLokalu).input).getText());
+			adr.setNrPosesji(((JTextField)fields.get(Fields.NrPosesji).input).getText());
+			adr.setUlica(((JTextField)fields.get(Fields.Ulica).input).getText());
 			
 			nowy.setAdres(adr);
-			nowy.setDataUrodzenia(DataValidation.validateDate(((JTextField)pola.get(Fields.DataUr).input).getText()));
-			nowy.setEmail(((JTextField)pola.get(Fields.Email).input).getText());
-			nowy.setImie(((JTextField)pola.get(Fields.Imie).input).getText());
-			nowy.setNazwisko(((JTextField)pola.get(Fields.Nazwisko).input).getText());
-			nowy.setPlec((User.Gender)((JComboBox<User.Gender>)pola.get(Fields.Plec).input).getSelectedItem());
-			nowy.setNrPesel(((JTextField)pola.get(Fields.NrPesel).input).getText());
-			nowy.setLogin(((JTextField)pola.get(Fields.Login).input).getText());
-			nowy.setNrTel(((JTextField)pola.get(Fields.NrTel).input).getText());
+			nowy.setBirthDate(DataValidation.validateDate(((JTextField)fields.get(Fields.DataUr).input).getText()));
+			nowy.setEmail(((JTextField)fields.get(Fields.Email).input).getText());
+			nowy.setName(((JTextField)fields.get(Fields.Imie).input).getText());
+			nowy.setLastname(((JTextField)fields.get(Fields.Nazwisko).input).getText());
+			nowy.setGender((User.Gender)((JComboBox<User.Gender>)fields.get(Fields.Plec).input).getSelectedItem());
+			nowy.setNrPesel(((JTextField)fields.get(Fields.NrPesel).input).getText());
+			nowy.setLogin(((JTextField)fields.get(Fields.Login).input).getText());
+			nowy.setNrTel(((JTextField)fields.get(Fields.NrTel).input).getText());
 		} catch(Exception e) {
 			return null;
 		}
@@ -334,13 +334,13 @@ public class EditUserPanel extends JPanel {
 	public boolean validateData() {
 		boolean error = false;
 		
-		for(Entry<Fields, InputIconPair> iip : pola.entrySet()) {
+		for(Entry<Fields, InputIconPair> iip : fields.entrySet()) {
 			if(iip.getValue().input instanceof JTextField) {
 				setError(iip.getKey(), null);
 			}
 		}
 		
-		for(Entry<Fields, InputIconPair> iip : pola.entrySet()) {
+		for(Entry<Fields, InputIconPair> iip : fields.entrySet()) {
 			if(iip.getValue().input instanceof JTextField) {
 				JTextField textfield = (JTextField)iip.getValue().input;
 				
@@ -352,8 +352,8 @@ public class EditUserPanel extends JPanel {
 		}
 		
 		Date d = null;
-		User.Gender plec = (User.Gender)((JComboBox<User.Gender>)pola.get(Fields.Plec).input).getSelectedItem();
-		String text = ((JTextField)pola.get(Fields.DataUr).input).getText().trim();
+		User.Gender plec = (User.Gender)((JComboBox<User.Gender>)fields.get(Fields.Plec).input).getSelectedItem();
+		String text = ((JTextField)fields.get(Fields.DataUr).input).getText().trim();
 		if(!text.trim().isEmpty()) {
 			try {
 				d = DataValidation.validateDate(text);
@@ -363,7 +363,7 @@ public class EditUserPanel extends JPanel {
 			}
 		}
 		
-		text = ((JTextField)pola.get(Fields.Email).input).getText().trim();
+		text = ((JTextField)fields.get(Fields.Email).input).getText().trim();
 		if(!text.trim().isEmpty()) {
 			try {
 				DataValidation.validateEmail(text);
@@ -373,7 +373,7 @@ public class EditUserPanel extends JPanel {
 			}
 		}
 		
-		text = ((JTextField)pola.get(Fields.NrTel).input).getText().trim();
+		text = ((JTextField)fields.get(Fields.NrTel).input).getText().trim();
 		if(!text.trim().isEmpty()) {
 			try {
 				DataValidation.validateNrTel(text);
@@ -383,7 +383,7 @@ public class EditUserPanel extends JPanel {
 			}
 		}
 		
-		text = ((JTextField)pola.get(Fields.NrPesel).input).getText().trim();
+		text = ((JTextField)fields.get(Fields.NrPesel).input).getText().trim();
 		if(!text.trim().isEmpty()) {
 			try {
 				DataValidation.validatePesel(text, d, plec);
@@ -397,7 +397,7 @@ public class EditUserPanel extends JPanel {
 	}
 	
 	public void setEditable(boolean editable) {
-		for(Entry<Fields, InputIconPair> iip : pola.entrySet()) {
+		for(Entry<Fields, InputIconPair> iip : fields.entrySet()) {
 			iip.getValue().input.setEnabled(editable);
 		}
 	}
@@ -408,7 +408,7 @@ public class EditUserPanel extends JPanel {
 	 * @param error Wiadomość błędu lub null by usunąć komunikat.
 	 */
 	public void setError(Fields field, String error) {
-		InputIconPair iip = pola.get(field);
+		InputIconPair iip = fields.get(field);
 		
 		iip.icon.setVisible(error != null);
 		iip.icon.setToolTipText(error);

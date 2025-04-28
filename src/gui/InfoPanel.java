@@ -58,8 +58,8 @@ public class InfoPanel extends JPanel {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("<h1>").append(u.getLogin()).append("</h1><hr>");
-		sb.append("<b>Imię</b>: ").append(u.getImie()).append("<br>");
-		sb.append("<b>Nazwisko</b>: ").append(u.getNazwisko()).append("<br><br>");
+		sb.append("<b>Imię</b>: ").append(u.getName()).append("<br>");
+		sb.append("<b>Nazwisko</b>: ").append(u.getLastname()).append("<br><br>");
 		
 		if(!u.isForgotten()) {
 			sb.append("<b>Adres zamieszkania</b><br>");
@@ -70,21 +70,21 @@ public class InfoPanel extends JPanel {
 			sb.append("<b>Nr lokalu</b>: ").append(u.getAdres().getNrLokalu()).append("<br><br>");
 			
 			sb.append("<b>Nr PESEL</b>: ").append(u.getNrPesel()).append("<br>");
-			sb.append("<b>Data urodzenia</b>: ").append(DataValidation.dateToString(u.getDataUrodzenia())).append("<br>");
-			sb.append("<b>Płeć</b>: ").append(u.getPlec()).append("<br>");
+			sb.append("<b>Data urodzenia</b>: ").append(DataValidation.dateToString(u.getBirthDate())).append("<br>");
+			sb.append("<b>Płeć</b>: ").append(u.getGender()).append("<br>");
 			sb.append("<b>Adres e-mail</b>: ").append(u.getEmail()).append("<br>");
 			sb.append("<b>Nr telefonu</b>: ").append(u.getNrTel()).append("<br>");
 		} else {
-			sb.append("<b>Data zapomnienia</b>: ").append(DataValidation.dateToString(u.getDataZapomnienia())).append("<br>");
-			sb.append("<b>Zapomniany przez</b>: ").append(u.getZapomnianyPrzez()).append("<br>");
+			sb.append("<b>Data zapomnienia</b>: ").append(DataValidation.dateToString(u.getForgottenDate())).append("<br>");
+			sb.append("<b>Zapomniany przez</b>: ").append(u.getForgottenBy()).append("<br>");
 		}
 		
 		sb.append("<h2>Uprawnienia</h2>");
-		HashSet<Permission> perms = u.getUprawnienia();
+		HashSet<Permission> perms = u.getPermissions();
 		if(!perms.isEmpty()) {
 			sb.append("<ul>");
-			for(Permission p : perms) {
-				sb.append("<li>").append(p.toString()).append("</li>");
+			for(Permission permission : perms) {
+				sb.append("<li>").append(permission.toString()).append("</li>");
 			}
 			sb.append("</ul>");
 		}
