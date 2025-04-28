@@ -111,7 +111,7 @@ public class DBServer implements Closeable {
 					+ "    )\r\n"
 					+ ") adresy ON uzytkownicy.login = adresy.uzytkownikLogin;");
 			
-			PreparedStatement stmt2 = dbConn.prepareStatement("SELECT idUprawnienia FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?");
+			PreparedStatement stmt2 = dbConn.prepareStatement("SELECT idUprawnienia FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?;");
 			
 			ResultSet rs = stmt.executeQuery();
 			
@@ -196,7 +196,7 @@ public class DBServer implements Closeable {
 			
 			stmt.executeUpdate();
 			
-			stmt = dbConn.prepareStatement("INSERT INTO adresy (miejscowosc, kodPocztowy, ulica, nrPosesji, nrLokalu) VALUES (?, ?, ?, ?, ?)");
+			stmt = dbConn.prepareStatement("INSERT INTO adresy (miejscowosc, kodPocztowy, ulica, nrPosesji, nrLokalu) VALUES (?, ?, ?, ?, ?);");
 			stmt.setString(1, uzytkownik.getAdres().getMiejscowosc());
 			stmt.setString(2, uzytkownik.getAdres().getKodPocztowy());
 			stmt.setString(3, uzytkownik.getAdres().getUlica());
@@ -209,12 +209,17 @@ public class DBServer implements Closeable {
 			if(rs.next()) {
 				int id = rs.getInt(1);
 				
-				stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyAdresy (uzytkownikLogin, adresId) VALUES (?, ?)");
+				stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyAdresy (uzytkownikLogin, adresId) VALUES (?, ?);");
 				stmt.setString(1, uzytkownik.getLogin());
 				stmt.setInt(2, id);
 				
 				stmt.executeUpdate();
 			}
+			
+			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyUprawnienia VALUES (?, 1);");
+			stmt.setString(1, uzytkownik.getLogin());
+			stmt.executeUpdate();
+			
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}

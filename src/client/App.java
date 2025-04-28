@@ -62,7 +62,7 @@ public class App {
 		InfoPanel userInfo = new InfoPanel();
 		
 		User user = new User();
-		user.setLogin("login133");
+		user.setLogin("login56");
 		user.setHaslo("B@rdzo_SkomplikowaneH@$$70");
 		user.setImie("Jakub");
 		user.setNazwisko("Nowak");
@@ -92,7 +92,7 @@ public class App {
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 				
-				//eup.setUzytkownik(user);
+				eup.setUzytkownik(user);
 				eup.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae2) {
 						(new SwingWorker<Void, Void>(){
