@@ -50,7 +50,7 @@ public class App {
 		
 		/*
 		 * TODO: komunikat gdy uprawnienia zostana zmienione ZROBIONE, uzytkownikom zapomnianym sa odbierane uprawnienia ZROBIONE,
-		 * refaktoring nazw zmiennych (zeby nie byly jednoliterowe :) )
+		 * refaktoring nazw zmiennych (zeby nie byly jednoliterowe :) ) zmiana nazwy musi posiadc wszystkie, filtry radio button
 		 */
 		DBServer serwer = new DBServer();
 		ClientCommunicationHandler serverHandler = new ClientCommunicationHandler(serwer);
