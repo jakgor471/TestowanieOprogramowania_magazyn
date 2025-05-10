@@ -136,7 +136,7 @@ INSERT INTO "uzytkownicy" VALUES ('galazka',NULL,'dONAĆfźZćóxHOXMbpiŁźkZBh
 INSERT INTO "uzytkownicy" VALUES ('login1334',NULL,'fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
 INSERT INTO "uzytkownicy" VALUES ('login1335',NULL,'fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
 INSERT INTO "uzytkownicy" VALUES ('login133555',NULL,'fJOBYciLĄwBmmTdCameFLWdIHWLIfdCą','YdUÓÓŹctGZĆSuĆDNbizgSbAiłLBćźŻęd','86081851713','1986-08-18',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('administrator','I3XFN/L5Y9XUhrOodC0PsXNUE7GK/7fjPi8PlbueDfU=','Przemysław','Kądziołek','74070417228','1974-07-04',0,'karolborowiecki792@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('administrator','VzEUIAl9XhLjgS1XlUWaxUWCcqtRHZ2xTwrhjyXJ6no=','Przemysław','Kądziołek','74070417228','1974-07-04',0,'karolborowiecki792@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
 INSERT INTO "uzytkownicyAdresy" VALUES ('login1133',1);
 INSERT INTO "uzytkownicyAdresy" VALUES ('killer',2);
 INSERT INTO "uzytkownicyAdresy" VALUES ('kfont2131',3);

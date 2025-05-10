@@ -51,6 +51,8 @@ public class App {
 	public static final String appTytul = "Magazyn";
 	
 	private static void exec(ServerCommunicationHandler serverHandler) {
+		//TODO Radio buttony w filtrowaniu zamiast checkboxa WSZYSTKIE
+		
 		JFrame frame = new JFrame(appTytul);
 		JMenuBar menu = new JMenuBar();
 		
@@ -534,9 +536,6 @@ public class App {
 		
 		DBServer serwer = new DBServer();
 		ClientCommunicationHandler serverHandler = new ClientCommunicationHandler(serwer);
-		
-		//serverHandler.createSession("administrator", "ZAQ!2wsx");
-		//exec(serverHandler);
 		
 		login(serverHandler);
 	}

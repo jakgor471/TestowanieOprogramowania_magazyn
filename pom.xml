@@ -2,9 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>TestowanieOprogramowania_magazyn</groupId>
   <artifactId>TestowanieOprogramowania_magazyn</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.4</version>
   <build>
-  
     <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
@@ -17,6 +16,29 @@
     </resources>
     
     <plugins>
+	    <plugin>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <version>3.4.2</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <mainClass>client.App</mainClass> <!-- Replace with your main class -->
+          </manifest>
+        </archive>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+      </configuration>
+      <executions>
+        <execution>
+          <id>make-assembly</id>
+          <phase>package</phase>
+          <goals>
+            <goal>single</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
