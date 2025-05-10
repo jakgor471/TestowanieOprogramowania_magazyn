@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.net.URL;
 import java.util.HashSet;
 
 import javax.swing.JPanel;

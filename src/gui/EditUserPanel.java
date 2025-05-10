@@ -38,6 +38,7 @@ public class EditUserPanel extends JPanel {
 	
 	private EnumMap<Fields, InputIconPair> fields;
 	private ArrayList<ActionListener> onClick;
+	private ArrayList<ActionListener> onClickSetPassword;
 	
 	private static class InputIconPair{
 		public Component input;
@@ -76,6 +77,10 @@ public class EditUserPanel extends JPanel {
 	}
 	
 	public EditUserPanel() {
+		this(false);
+	}
+	
+	public EditUserPanel(boolean setPasswordButton) {
 		//this.setBorder(BorderFactory.createEtchedBorder());
 		
 		this.setLayout(new GridBagLayout());		
@@ -87,6 +92,7 @@ public class EditUserPanel extends JPanel {
 		InputIconPair nowe = null;
 		fields = new EnumMap<>(Fields.class);
 		onClick = new ArrayList<ActionListener>();
+		onClickSetPassword = new ArrayList<ActionListener>();
 		
 		gbc.gridy = 0;
 		
@@ -229,6 +235,26 @@ public class EditUserPanel extends JPanel {
 		this.add(nowe.icon, gbc);
 		++gbc.gridy;
 		
+		if(setPasswordButton) {
+			gbc.gridx = 0;
+			gbc.gridwidth = 2;
+			JButton button2 = new JButton();
+			button2.setText("Ustaw/zmień hasło");
+			button2.addActionListener(new ActionListener() {
+	
+				public void actionPerformed(ActionEvent e) {
+					if(!validateData())
+						return;
+					
+					for(ActionListener al : onClickSetPassword)
+						al.actionPerformed(e);
+				}
+				
+			});
+			this.add(button2, gbc);
+			++gbc.gridy;
+		}
+		
 		gbc.gridx = 0;
 		gbc.gridwidth = 2;
 		JButton button = new JButton();
@@ -255,6 +281,14 @@ public class EditUserPanel extends JPanel {
 	
 	public void removeActionListener(ActionListener al) {
 		onClick.remove(al);
+	}
+	
+	public void addSetPasswordActionListener(ActionListener al) {
+		onClickSetPassword.add(al);
+	}
+	
+	public void removeSetPasswordActionListener(ActionListener al) {
+		onClickSetPassword.remove(al);
 	}
 	
 	public String getOriginalLogin() {

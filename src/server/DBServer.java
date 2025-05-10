@@ -93,6 +93,32 @@ public class DBServer implements Closeable {
 		}
 	}
 	
+	public HashSet<Permission> getUserPermissions(String login){
+		try {
+			PreparedStatement stmt2 = dbConn.prepareStatement("SELECT idUprawnienia FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?;");
+			
+			stmt2.setString(1, login);
+			ResultSet rs2 = stmt2.executeQuery();
+			
+			HashSet<Permission> set = new HashSet<>();
+			
+			while(rs2.next()) {
+				int idUprawnienia = rs2.getInt(1);
+				
+				if(idUprawnienia < 1 || idUprawnienia > Permission.values().length)
+					continue;
+				
+				set.add(Permission.values()[idUprawnienia - 1]);
+			}
+			
+			return set;
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public ArrayList<User> getUsers(){
 		ArrayList<User> users = new ArrayList<User>();
 		
@@ -119,7 +145,6 @@ public class DBServer implements Closeable {
 				try {
 					User user = new User();
 					user.setLogin(rs.getString("login"));
-					user.setPasswordHash(rs.getString("haslo"));
 					user.setName(rs.getString("imie"));
 					user.setLastname(rs.getString("nazwisko"));
 					user.setNrPesel(rs.getString("nrPesel"));
@@ -140,17 +165,7 @@ public class DBServer implements Closeable {
 					user.getAdres().setNrPosesji(rs.getString("nrPosesji"));
 					user.getAdres().setNrLokalu(rs.getString("nrLokalu"));
 					
-					stmt2.setString(1, rs.getString("login"));
-					ResultSet rs2 = stmt2.executeQuery();
-					
-					while(rs2.next()) {
-						int idUprawnienia = rs2.getInt(1);
-						
-						if(idUprawnienia < 1 || idUprawnienia > Permission.values().length)
-							continue;
-						
-						user.addPermission(Permission.values()[idUprawnienia - 1]);
-					}
+					user.setPermissions(getUserPermissions(rs.getString("login")));
 					
 					users.add(user);
 				} catch(Exception e) {
@@ -182,17 +197,16 @@ public class DBServer implements Closeable {
 			if(rs.next() && rs.getInt(1) > 0)
 				throw new IllegalArgumentException("Nieunikalny login użytkownika!");
 			
-			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicy (login, haslo, imie, nazwisko, nrPesel, dataUrodzenia, plec, email, numerTelefonu, zapomniany) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicy (login, imie, nazwisko, nrPesel, dataUrodzenia, plec, email, numerTelefonu, zapomniany) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
 			stmt.setString(1, user.getLogin());
-			stmt.setString(2, user.getPasswordHash());
-			stmt.setString(3, user.getName());
-			stmt.setString(4, user.getLastname());
-			stmt.setString(5, user.getNrPesel());
-			stmt.setString(6, DataValidation.dateToSqlString(user.getBirthDate()));
-			stmt.setInt(7, user.getGender().ordinal());
-			stmt.setString(8, user.getEmail());
-			stmt.setString(9, user.getNrTel());
-			stmt.setBoolean(10, user.isForgotten());
+			stmt.setString(2, user.getName());
+			stmt.setString(3, user.getLastname());
+			stmt.setString(4, user.getNrPesel());
+			stmt.setString(5, DataValidation.dateToSqlString(user.getBirthDate()));
+			stmt.setInt(6, user.getGender().ordinal());
+			stmt.setString(7, user.getEmail());
+			stmt.setString(8, user.getNrTel());
+			stmt.setBoolean(9, user.isForgotten());
 			
 			stmt.executeUpdate();
 			
@@ -247,24 +261,23 @@ public class DBServer implements Closeable {
 			} else if(rs.getInt(1) > 0)
 				throw new IllegalArgumentException("Nieunikalny login użytkownika!");
 			
-			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, haslo = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ?, zapomniany = ?, dataZapomnienia = ?, zapomnianyPrzez = ? WHERE login = ?;");
+			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ?, zapomniany = ?, dataZapomnienia = ?, zapomnianyPrzez = ? WHERE login = ?;");
 			stmt.setString(1, user.getLogin());
-			stmt.setString(2, user.getPasswordHash());
-			stmt.setString(3, user.getName());
-			stmt.setString(4, user.getLastname());
-			stmt.setString(5, user.getNrPesel());
-			stmt.setString(6, DataValidation.dateToSqlString(user.getBirthDate()));
-			stmt.setInt(7, user.getGender().ordinal());
-			stmt.setString(8, user.getEmail());
-			stmt.setString(9, user.getNrTel());
-			stmt.setBoolean(10, user.isForgotten());
+			stmt.setString(2, user.getName());
+			stmt.setString(3, user.getLastname());
+			stmt.setString(4, user.getNrPesel());
+			stmt.setString(5, DataValidation.dateToSqlString(user.getBirthDate()));
+			stmt.setInt(6, user.getGender().ordinal());
+			stmt.setString(7, user.getEmail());
+			stmt.setString(8, user.getNrTel());
+			stmt.setBoolean(9, user.isForgotten());
 			
 			if(user.isForgotten()) {
-				stmt.setString(11, DataValidation.dateToSqlString(user.getForgottenDate()));
-				stmt.setString(12, user.getForgottenBy());
+				stmt.setString(10, DataValidation.dateToSqlString(user.getForgottenDate()));
+				stmt.setString(11, user.getForgottenBy());
 			}
 			
-			stmt.setString(13, oldLogin);
+			stmt.setString(12, oldLogin);
 			
 			stmt.executeUpdate();
 			
@@ -282,20 +295,172 @@ public class DBServer implements Closeable {
 		}
 	}
 	
-	public void editUserPermissions(User user, HashSet<Permission> perms) {
+	public void editUserPassword(String login, String passwordHash) throws IllegalArgumentException {
+		try {			
+			PreparedStatement stmt = dbConn.prepareStatement("SELECT EXISTS (SELECT 1 FROM (SELECT haslo FROM uzytkownicyPoprzednieHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 3) WHERE haslo = ?);");
+			stmt.setString(1, login);
+			stmt.setString(2, passwordHash);
+			
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			if(rs.getInt(1) != 0)
+				throw new IllegalArgumentException("Nowe hasło musi być inne niż 3 poprzednie hasła");
+			
+			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET haslo = ? WHERE login = ?");
+			stmt.setString(1, passwordHash);
+			stmt.setString(2, login);
+			stmt.executeUpdate();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void editUserPermissions(String login, HashSet<Permission> perms) {
 		try {
 			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
 			PreparedStatement stmt = dbConn.prepareStatement("DELETE FROM uzytkownicyUprawnienia WHERE uzytkownikLogin = ?;");
-			stmt.setString(1, user.getLogin());
+			stmt.setString(1, login);
 			stmt.executeUpdate();
 			
 			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyUprawnienia VALUES(?, ?);");
-			stmt.setString(1, user.getLogin());
+			stmt.setString(1, login);
 			
 			for(Permission p : perms) {
 				stmt.setInt(2, p.ordinal() + 1);
 				stmt.executeUpdate();
 			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static enum LoginResult{
+		Invalid,
+		RegularPassword,
+		OneTimePassword
+	}
+	
+	public LoginResult validateUserPassword(String login, String passwordHash) {
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(
+					"SELECT CASE"
+					+ " WHEN EXISTS (SELECT 1 FROM uzytkownicy WHERE login = ? AND haslo = ?) THEN 1"
+					+ " WHEN EXISTS (SELECT 1 FROM (SELECT 1 FROM uzytkownicyHasla WHERE uzytkownikLogin = ? AND haslo = ? AND uzyte <> 1 ORDER BY id DESC LIMIT 1)) THEN 2"
+					+ " ELSE 0"
+					+ " END;"
+			);
+			stmt.setString(1, login);
+			stmt.setString(2, passwordHash);
+			stmt.setString(3, login);
+			stmt.setString(4, passwordHash);
+			
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			
+			return LoginResult.values()[rs.getInt(1)];
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return LoginResult.Invalid;
+	}
+	
+	public long loginBlockTime(String login, String ip, int maxTries) {
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(
+					"SELECT czasZalogowania, liczbaProb FROM probyZalogowania WHERE login = ? AND adresIp = ?;"
+			);
+			stmt.setString(1, login);
+			stmt.setString(2, ip);
+
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			
+			if(rs.getInt("liczbaProb") >= maxTries)
+				return rs.getLong("czasZalogowania");
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return -1;
+	}
+	
+	public void addLoginAttempt(String login, String ip) {
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement("INSERT OR IGNORE INTO probyZalogowania (login, adresIp, czasZalogowania, liczbaProb) VALUES (?, ?, ?, 0);");
+			stmt.setString(1, login);
+			stmt.setString(2, ip);
+			stmt.setLong(3, System.currentTimeMillis());
+			
+			stmt.executeUpdate();
+			
+			stmt = dbConn.prepareStatement("UPDATE probyZalogowania SET liczbaProb = liczbaProb + 1, czasZalogowania = ? WHERE login = ? AND adresIp = ?;");
+			stmt.setLong(1, System.currentTimeMillis());
+			stmt.setString(2, login);
+			stmt.setString(3, ip);
+			
+			stmt.executeUpdate();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void resetLoginAttempts(String login, String ip) {
+		try {
+			PreparedStatement stmt;
+			
+			stmt = dbConn.prepareStatement("UPDATE probyZalogowania SET liczbaProb = 1 WHERE login = ? AND adresIp = ?;");
+			stmt.setString(1, login);
+			stmt.setString(2, ip);
+			
+			stmt.executeUpdate();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean validateUserEmail(String login, String email) {
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(
+					"SELECT EXISTS (SELECT 1 FROM uzytkownicy WHERE login = ? AND email = ?);"
+			);
+			stmt.setString(1, login);
+			stmt.setString(2, email);
+
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			
+			return rs.getInt(1) == 1;
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public void addRecoveryPassword(String login, String passwordHash) {
+		try {
+			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
+			PreparedStatement stmt = dbConn.prepareStatement(
+				"INSERT INTO uzytkownicyHasla (uzytkownikLogin, haslo, uzyte) VALUES (?, ?, 0);"
+			);
+			stmt.setString(1, login);
+			stmt.setString(2, passwordHash);
+
+			stmt.executeUpdate();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void invalidateRecoveryPassword(String login) {
+		try {
+			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
+			PreparedStatement stmt = dbConn.prepareStatement(
+				"UPDATE uzytkownicyHasla SET uzyte = 1 WHERE id = (SELECT id FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1);"
+			);
+			stmt.setString(1, login);
+
+			stmt.executeUpdate();
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}

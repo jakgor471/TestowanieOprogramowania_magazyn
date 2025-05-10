@@ -30,3 +30,4 @@ dependencies/
 doc/
 *.db
 target/
+*.properties

@@ -26,7 +26,12 @@ public final class DataValidation {
 	private static final Pattern EMAIL_REGEX = Pattern.compile("[\\w\\d\\.\\-]+@[\\w\\d\\.]+\\.\\w+");
 	private static final Pattern DATA_REGEX = Pattern.compile("\\d{2}-\\d{2}-\\d{4}");
 	private static final Pattern NRTEL_REGEX = Pattern.compile("\\d{9}");
-	private static final String LETTERS = "AĄBCĆDEĘFGHIJKLŁMNOÓPRSTUWZŹŻXYaąbcćdeęfghijklłmnoóprstuwzźżxy";
+	private static final Pattern PASSWORD_REGEX = Pattern.compile("^(?=(.*[A-Z]){1,})(?=(.*[a-z]){1,})(?=(.*[\\-\\_\\!\\*\\#\\$\\&]){1,})(?=(.*\\d){1,}).*$");
+	private static final char[] LETTERS = "AĄBCĆDEĘFGHIJKLŁMNOÓPRSTUWZŹŻXYaąbcćdeęfghijklłmnoóprstuwzźżxy".toCharArray();
+	private static final char[] LETTERS_LOWER = "abcdefghijklmnoprstuvwzxy".toCharArray();
+	private static final char[] LETTERS_UPPER = "ABCDEFGHIJKLMNOPRSTUVWZXY".toCharArray();
+	private static final char[] DIGITS = "0123456789".toCharArray();
+	private static final char[] SPECIAL_CHARS = "-_!*#$&".toCharArray();
 	private static final Random rand = new Random();
 	
 	static {
@@ -35,6 +40,29 @@ public final class DataValidation {
 	
 	private DataValidation() {
 		
+	}
+	
+	public static String generatePassword() {
+		char[] passChars = new char[10];
+		
+		for(int i = 0; i < 3; ++i) {
+			passChars[i] = LETTERS_LOWER[rand.nextInt(LETTERS_LOWER.length)];
+			passChars[i + 3] = LETTERS_UPPER[rand.nextInt(LETTERS_UPPER.length)];
+		}
+		
+		for(int i = 0; i < 2; ++i) {
+			passChars[i + 6] = DIGITS[rand.nextInt(DIGITS.length)];
+			passChars[i + 8] = SPECIAL_CHARS[rand.nextInt(SPECIAL_CHARS.length)];
+		}
+		
+		for(int i = 0; i < passChars.length; ++i) {
+			int shuffle = rand.nextInt(passChars.length);
+			char temp = passChars[i];
+			passChars[i] = passChars[shuffle];
+			passChars[shuffle] = temp;
+		}
+		
+		return new String(passChars);
 	}
 	
 	public static String hashPassword(String passwd) {
@@ -54,7 +82,7 @@ public final class DataValidation {
 		StringBuilder sb = new StringBuilder(length);
 		
 		for(int i = 0; i < length; ++i) {
-			sb.append(LETTERS.charAt(rand.nextInt(LETTERS.length())));
+			sb.append(LETTERS[rand.nextInt(LETTERS.length)]);
 		}
 		
 		return sb.toString();
@@ -194,6 +222,18 @@ public final class DataValidation {
 			throw new IllegalArgumentException("Niepoprawna data");
 		}
 		
+	}
+	
+	public static boolean validatePassword(String password) throws IllegalArgumentException {
+		if(password.length() < 8 || password.length() > 15)
+			throw new IllegalArgumentException("Hasło musi zawierać nie mniej niż 8 oraz nie więcej niż 15 znaków");
+		
+		Matcher m = PASSWORD_REGEX.matcher(password);
+		
+		if(!m.matches())
+			throw new IllegalArgumentException("Hasło nie spełnia warunków walidacji");
+		
+		return true;
 	}
 	
 	/**

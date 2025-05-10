@@ -19,7 +19,6 @@ public class User implements Cloneable{
 	private Gender plec;
 	private String email;
 	private String nrTel;
-	private String hasloHash;
 	private boolean zapomniany;
 	private Date dataZapomnienia;
 	private String zapomnianyPrzez;
@@ -30,6 +29,11 @@ public class User implements Cloneable{
 		dataUrodzenia = new Date();
 		zapomniany = false;
 		uprawnienia = new HashSet<Permission>();
+	}
+	
+	public void setPermissions(HashSet<Permission> perms) {
+		this.uprawnienia.clear();
+		this.uprawnienia.addAll(perms);
 	}
 	
 	public void addPermission(Permission p) {
@@ -198,18 +202,6 @@ public class User implements Cloneable{
 	public void setNrTel(String nrTel) {
 		this.nrTel = nrTel;
 	}
-	
-	public String getPasswordHash() {
-		return hasloHash;
-	}
-
-	public void setPasswordHash(String hasloHash) {
-		this.hasloHash = hasloHash;
-	}
-	
-	public void setPassword(String haslo) {
-		this.hasloHash = DataValidation.hashPassword(haslo);
-	}
 
 	public Date getForgottenDate() {
 		return dataZapomnienia;
@@ -238,7 +230,6 @@ public class User implements Cloneable{
 		nowy.nrPesel = this.nrPesel;
 		nowy.nrTel = this.nrTel;
 		nowy.plec = this.plec;
-		nowy.hasloHash = this.hasloHash;
 		nowy.zapomniany = this.zapomniany;
 		nowy.uprawnienia = (HashSet<Permission>)this.uprawnienia.clone();
 		nowy.zapomnianyPrzez = this.zapomnianyPrzez;

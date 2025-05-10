@@ -2,6 +2,8 @@ package shared;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Date;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
@@ -224,6 +226,24 @@ class DataValidationTest {
 			Date d2 = DataValidation.dateFromPesel(pesel);
 			
 			assertEquals(d, d2);
+		}
+	}
+	
+	@Test
+	void validateGeneratePassword() {
+		Pattern p = Pattern.compile("^(?=(.*[A-Z]){3,})(?=(.*[a-z]){3,})(?=(.*[\\-\\_\\!\\*\\#\\$\\&]){2,})(?=(.*\\d){2,}).*$");
+		Matcher m;
+		for(int i = 0; i < 100; ++i) {
+			String passwd = DataValidation.generatePassword();
+			m = p.matcher(passwd);
+			
+			assertTrue(m.matches());
+			try {
+				assertTrue(DataValidation.validatePassword(passwd));
+			} catch(IllegalArgumentException e) {
+				System.out.println(e.getMessage());
+				fail("Błąd walidacji hasła!");
+			}
 		}
 	}
 }

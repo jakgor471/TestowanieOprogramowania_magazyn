@@ -13,13 +13,28 @@ public class ActiveSession {
 	private long sessionId;
 	private String login;
 	private HashSet<Permission> permission;
+	private boolean oneTime;
 	
 	public ActiveSession(long sessionId, String login) {
 		permission = new HashSet<Permission>();
 		this.sessionId = sessionId;
 		this.login = login;
+		oneTime = false;
 	}
 	
+	public boolean isOneTime() {
+		return oneTime;
+	}
+
+	public void setOneTime(boolean oneTime) {
+		this.oneTime = oneTime;
+	}
+	
+	public void setPermissions(HashSet<Permission> perms) {
+		this.permission.clear();
+		this.permission.addAll(perms);
+	}
+
 	public void addPermission(Permission p) {
 		permission.add(p);
 	}

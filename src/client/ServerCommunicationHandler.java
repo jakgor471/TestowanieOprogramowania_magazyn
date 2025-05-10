@@ -1,8 +1,10 @@
 package client;
 
+import java.util.HashSet;
 import java.util.List;
 
 import shared.ActiveSession;
+import shared.Permission;
 import shared.ServerResponse;
 import shared.User;
 
@@ -22,8 +24,10 @@ public abstract class ServerCommunicationHandler {
 	 * @param login Login użytkownika chcącego rozpocząć nową sesję.
 	 * @param haslo Hasło użytkownika chcącego rozpoczać nową sesję.
 	 * @return Prawda jeśli pomyślnie utworzono sesję.
+	 * @throws Exception 
 	 */
-	public abstract ActiveSession createSession(String login, String haslo);
+	public abstract boolean createSession(String login, String haslo) throws Exception;
+	public abstract ActiveSession getSession();
 	
 	/**
 	 * Kończy aktywną sesję.
@@ -46,6 +50,8 @@ public abstract class ServerCommunicationHandler {
 	 */
 	public abstract void editUser(User user, String oldLogin);
 	
+	public abstract void editUserPassword(String login, String password);
+	
 	public abstract void forgetUser(User user);
 	
 	/**
@@ -58,4 +64,8 @@ public abstract class ServerCommunicationHandler {
 	
 	public abstract void addResponseListener(ServerResponseListener listener);
 	public abstract void removeResponseListener(ServerResponseListener listener);
+
+	public abstract void editUserPermissions(User newUser, HashSet<Permission> permissions);
+	public abstract boolean isOneTimeLogin();
+	protected abstract void resetUserPassword(String login, String email);
 }
