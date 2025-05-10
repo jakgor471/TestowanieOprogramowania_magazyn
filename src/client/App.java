@@ -51,10 +51,6 @@ public class App {
 	public static final String appTytul = "Magazyn";
 	
 	private static void exec(ServerCommunicationHandler serverHandler) {
-		/*
-		 * TODO: komunikat gdy uprawnienia zostana zmienione ZROBIONE, uzytkownikom zapomnianym sa odbierane uprawnienia ZROBIONE,
-		 * refaktoring nazw zmiennych (zeby nie byly jednoliterowe :) )
-		 */		
 		JFrame frame = new JFrame(appTytul);
 		JMenuBar menu = new JMenuBar();
 		
