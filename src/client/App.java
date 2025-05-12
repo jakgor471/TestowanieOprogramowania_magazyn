@@ -62,6 +62,17 @@ public class App {
 		JMenuItem logout = new JMenuItem("Wyloguj");
 		logout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
+				int option = JOptionPane.showConfirmDialog(
+				    frame,
+				    "Czy na pewno wylogować?",
+				    "Wylogowanie",
+				    JOptionPane.OK_CANCEL_OPTION,
+				    JOptionPane.PLAIN_MESSAGE
+				);
+				
+				if(option != JOptionPane.OK_OPTION)
+					return;
+				
 				frame.dispose();
 				serverHandler.endSession();
 				login(serverHandler);
