@@ -222,6 +222,7 @@ public class App {
 									User newUser = eup.getUzytkownik();
 									serverHandler.editUser(newUser, eup.getOriginalLogin());
 									serverHandler.editUserPermissions(newUser, perms.getPermissions());
+									subframe.dispose();
 									userListModel.setUserList(serverHandler.getUsers());
 									//userList.setModel(userListModel);
 									
