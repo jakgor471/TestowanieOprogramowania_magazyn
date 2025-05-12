@@ -46,6 +46,8 @@ public class LoginPanel extends JPanel {
 		passwordField = null;
 		passwordField2 = null;
 		
+		String buttonText = "Zaloguj";
+		
 		if(panelType == Type.ForgotPassword) {
 			gbc.gridx = 0;
 			gbc.gridwidth = 2;
@@ -59,6 +61,8 @@ public class LoginPanel extends JPanel {
 			gbc.gridx = 1;
 			this.add(emailField, gbc);
 			++gbc.gridy;
+			
+			buttonText = "Resetuj hasło";
 		}
 		
 		if(panelType == Type.PasswordReset) {
@@ -77,8 +81,6 @@ public class LoginPanel extends JPanel {
 			this.add(loginField, gbc);
 			++gbc.gridy;
 		}
-		
-		String buttonText = "Zaloguj";
 		
 		if(panelType == Type.Login || panelType == Type.PasswordReset) {
 			passwordField = new JPasswordField(15);
