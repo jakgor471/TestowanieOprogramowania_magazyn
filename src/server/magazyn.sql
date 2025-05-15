@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS "uprawnienia" (
 );
 CREATE TABLE IF NOT EXISTS "uzytkownicy" (
 	"login"	TEXT NOT NULL UNIQUE,
-	"haslo"	TEXT,
 	"imie"	TEXT NOT NULL,
 	"nazwisko"	TEXT NOT NULL,
 	"nrPesel"	TEXT NOT NULL,
@@ -55,7 +54,6 @@ CREATE TABLE IF NOT EXISTS "uzytkownicyHasla" (
 	"id" INTEGER NOT NULL UNIQUE,
 	"uzytkownikLogin" TEXT NOT NULL,
 	"haslo" TEXT NOT NULL,
-	"uzyte" INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT),
 	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login")
 );
@@ -75,12 +73,12 @@ CREATE TABLE IF NOT EXISTS "uzytkownicyAdresy" (
 	FOREIGN KEY("adresId") REFERENCES "adresy"("id"),
 	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login") ON UPDATE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "uzytkownicyPoprzednieHasla" (
-	"id" INTEGER NOT NULL UNIQUE,
-	"uzytkownikLogin" TEXT NOT NULL,
-	"haslo" TEXT NOT NULL,
-	PRIMARY KEY("id"),
-	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login") ON UPDATE CASCADE
+CREATE TABLE IF NOT EXISTS "wygenerowaneHasla" (
+	"hasloId" TEXT NOT NULL,
+	"czyUzyte" INTEGER NOT NULL,
+	"dataWygenerowania" TEXT NOT NULL,
+	PRIMARY KEY("hasloId"),
+	FOREIGN KEY("hasloId") REFERENCES "uzytkownicyHasla"("id") ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "uzytkownicyUprawnienia" (
 	"uzytkownikLogin"	TEXT,
@@ -103,13 +101,6 @@ BEGIN
 INSERT INTO historiaStanow (towarId, ilosc,data)
 VALUES (NEW.id, NEW.ilosc, DATE('now'));
 END;
-CREATE TRIGGER aktualizacjaHasla
-AFTER UPDATE OF haslo ON uzytkownicy
-WHEN NEW.haslo IS NOT NULL
-BEGIN
-INSERT INTO uzytkownicyPoprzednieHasla (uzytkownikLogin, haslo)
-VALUES (NEW.login, NEW.haslo);
-END;
 COMMIT;
 
 INSERT INTO "uprawnienia" VALUES (1, "Użytkownik");
@@ -128,15 +119,16 @@ INSERT INTO "adresy" VALUES (6,'Zduńska Wola','95-200','Pomorska','39','2');
 INSERT INTO "adresy" VALUES (7,'Zduńska Wola','95-200','Pomorska','39','2');
 INSERT INTO "adresy" VALUES (8,'Zduńska Wola','95-200','Pomorska','39','2');
 INSERT INTO "adresy" VALUES (9,'Pabianice','95-200','Ostatnia','6/8','32');
-INSERT INTO "uzytkownicy" VALUES ('login1133',NULL,'Jakub','Nowak','02070803628','2002-07-08',0,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('killer',NULL,'Kuba','Brenner','12122178781','2112-12-21',0,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('kfont2131',NULL,'Karol','Fontaniak','12122178781','2112-12-21',0,'karol.font@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('dakun212',NULL,'Dawid','Kuna','21092485733','2121-09-24',1,'dawid.k@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('galazka',NULL,'dONAĆfźZćóxHOXMbpiŁźkZBhASEpFNod','rdłąĆXCKkędHŻłUęasaxYmXCwmDSćżsS','42101466813','2142-10-14',1,'galazka.michal@edu.uni.lodz.pl','692504256',1,'2025-03-28','admin',NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('login1334',NULL,'fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('login1335',NULL,'fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('login133555',NULL,'fJOBYciLĄwBmmTdCameFLWdIHWLIfdCą','YdUÓÓŹctGZĆSuĆDNbizgSbAiłLBćźŻęd','86081851713','1986-08-18',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
-INSERT INTO "uzytkownicy" VALUES ('administrator','VzEUIAl9XhLjgS1XlUWaxUWCcqtRHZ2xTwrhjyXJ6no=','Przemysław','Kądziołek','74070417228','1974-07-04',0,'karolborowiecki792@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('login1133','Jakub','Nowak','02070803628','2002-07-08',0,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('killer','Kuba','Brenner','12122178781','2112-12-21',0,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('kfont2131','Karol','Fontaniak','12122178781','2112-12-21',0,'karol.font@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('dakun212','Dawid','Kuna','21092485733','2121-09-24',1,'dawid.k@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('galazka','dONAĆfźZćóxHOXMbpiŁźkZBhASEpFNod','rdłąĆXCKkędHŻłUęasaxYmXCwmDSćżsS','42101466813','2142-10-14',1,'galazka.michal@edu.uni.lodz.pl','692504256',1,'2025-03-28','admin',NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('login1334','fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('login1335','fpłgĘWGznAęźNNfhiWetrrLxsJŁizidl','jUJofdióDCURHŻĄÓoFyBAzBiYBSzZtóS','14120369093','2114-12-03',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('login133555','fJOBYciLĄwBmmTdCameFLWdIHWLIfdCą','YdUÓÓŹctGZĆSuĆDNbizgSbAiłLBćźŻęd','86081851713','1986-08-18',1,'jakub.nowak@edu.uni.lodz.pl','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicy" VALUES ('administrator','Przemysław','Kądziołek','74070417228','1974-07-04',0,'karolborowiecki792@gmail.com','692504256',0,NULL,NULL,NULL,NULL);
+INSERT INTO "uzytkownicyHasla"('uzytkownikLogin', 'haslo') VALUES('administrator', 'VzEUIAl9XhLjgS1XlUWaxUWCcqtRHZ2xTwrhjyXJ6no=');
 INSERT INTO "uzytkownicyAdresy" VALUES ('login1133',1);
 INSERT INTO "uzytkownicyAdresy" VALUES ('killer',2);
 INSERT INTO "uzytkownicyAdresy" VALUES ('kfont2131',3);

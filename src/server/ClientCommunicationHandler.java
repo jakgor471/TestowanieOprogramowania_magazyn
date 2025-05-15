@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +122,12 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 				    InternetAddress.parse(email)
 				);
 				message.setSubject("Magazyn - odzyskiwanie hasła");
-				message.setText("Dzień dobry,\n\nWygenerowane hasło do odzyskiwania:\n" + generatedPassword);
+				
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.DAY_OF_MONTH, 7);
+				Date expiry = cal.getTime();
+				
+				message.setText("Dzień dobry,\n\nWygenerowane hasło do odzyskiwania:\n" + generatedPassword + "\nHasło wygaśnie dnia " + DataValidation.dateToString(expiry));
 				
 				Transport.send(message);
 			} catch (MessagingException e) {

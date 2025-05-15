@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -22,6 +23,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -51,9 +53,11 @@ public class App {
 	public static final String appTytul = "Magazyn";
 	
 	private static void exec(ServerCommunicationHandler serverHandler) {
-		//TODO Radio buttony w filtrowaniu zamiast checkboxa WSZYSTKIE
+		//TODO Radio buttony w filtrowaniu zamiast checkboxa WSZYSTKIE, zrobione
+		if(serverHandler.getSession() == null)
+			return;
 		
-		JFrame frame = new JFrame(appTytul);
+		JFrame frame = new JFrame(appTytul + " - zalogowano jako: " + serverHandler.getSession().getLogin());
 		JMenuBar menu = new JMenuBar();
 		
 		JMenu sessionMenu = new JMenu("Sesja");
@@ -184,8 +188,10 @@ public class App {
 						boolean valid = false;
 						do {
 							JPasswordField passwordField = new JPasswordField();
+							JPasswordField passwordField2 = new JPasswordField();
 							Object[] message = {
-							    "Nowe hasło:", passwordField
+								"Nowe hasło:", passwordField,
+							    "Powtórz hasło:", passwordField2,
 							};
 
 							int option = JOptionPane.showConfirmDialog(
@@ -200,6 +206,13 @@ public class App {
 								return;
 							
 							password = new String(passwordField.getPassword());
+							String password2 = new String(passwordField2.getPassword());
+							
+							if(!password.equals(password2)) {
+								JOptionPane.showMessageDialog(subframe, "Podane hasła nie są takie same", "BŁĄD!", JOptionPane.ERROR_MESSAGE);
+								continue;
+							}
+							
 							try {
 								valid = DataValidation.validatePassword(password);
 							} catch(IllegalArgumentException e) {
@@ -211,6 +224,7 @@ public class App {
 							serverHandler.editUserPassword(selectedUser.getLogin(), password);
 						} catch(Exception e) {
 							JOptionPane.showMessageDialog(subframe, e.getMessage(), "BŁĄD!", JOptionPane.ERROR_MESSAGE);
+							return;
 						}
 						
 						JOptionPane.showMessageDialog(subframe, "Zmieniono hasło.", "INFO", JOptionPane.INFORMATION_MESSAGE);
@@ -386,10 +400,17 @@ public class App {
 				
 				p.setPermissions(perms);
 				
-				panel.add(new JLabel("Filtruj uprawnienia"));
+				panel.add(new JLabel("Musi posiadać: "));
 				panel.add(p);
-				JCheckBox checkBox2 = new JCheckBox("Musi posiadać WSZYSTKIE");
-				panel.add(checkBox2);
+				JRadioButton radio1 = new JRadioButton("Wszystkie zaznaczone uprawnienia");
+				JRadioButton radio2 = new JRadioButton("Przynajmniej jedno zaznaczone uprawnienie");
+				ButtonGroup bg = new ButtonGroup();
+				bg.add(radio1);
+				bg.add(radio2);
+				radio1.setSelected(userListModel.isAllPerms());
+				radio2.setSelected(!userListModel.isAllPerms());
+				panel.add(radio1);
+				panel.add(radio2);
 				panel.add(new JLabel("Status użytkownika"));
 				
 				JCheckBox checkBox = new JCheckBox("Tylko zapomnieni");
@@ -402,7 +423,7 @@ public class App {
 				filtruj.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae) {
 						userListModel.setShowForgotten(checkBox.isSelected());
-						userListModel.setAllPerms(checkBox2.isSelected());
+						userListModel.setAllPerms(radio1.isSelected());
 						userListModel.setPermissions(p.getPermissions());
 						userListModel.filter();
 					}
@@ -413,7 +434,7 @@ public class App {
 				subframe.getContentPane().add(new JScrollPane(panel));
 				
 				subframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				subframe.setSize(300, 250);
+				subframe.setSize(300, 350);
 				subframe.setLocation(frame.getLocation());
 				subframe.setVisible(true);
 			}
@@ -549,6 +570,10 @@ public class App {
 		DBServer serwer = new DBServer();
 		ClientCommunicationHandler serverHandler = new ClientCommunicationHandler(serwer);
 		
-		login(serverHandler);
+		//serverHandler.createSession("administrator", "ZAQ!2wsx");
+		if(serverHandler.getSession() == null)
+			login(serverHandler);
+		else
+			exec(serverHandler);
 	}
 }

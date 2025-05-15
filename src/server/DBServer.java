@@ -218,17 +218,11 @@ public class DBServer implements Closeable {
 			stmt.setString(5, user.getAdres().getNrLokalu());
 			
 			stmt.executeUpdate();
+
+			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyAdresy (uzytkownikLogin, adresId) VALUES (?, last_insert_rowid());");
+			stmt.setString(1, user.getLogin());
 			
-			rs = dbConn.createStatement().executeQuery("SELECT last_insert_rowid();");
-			if(rs.next()) {
-				int id = rs.getInt(1);
-				
-				stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyAdresy (uzytkownikLogin, adresId) VALUES (?, ?);");
-				stmt.setString(1, user.getLogin());
-				stmt.setInt(2, id);
-				
-				stmt.executeUpdate();
-			}
+			stmt.executeUpdate();
 			
 			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyUprawnienia VALUES (?, 1);");
 			stmt.setString(1, user.getLogin());
@@ -297,7 +291,7 @@ public class DBServer implements Closeable {
 	
 	public void editUserPassword(String login, String passwordHash) throws IllegalArgumentException {
 		try {			
-			PreparedStatement stmt = dbConn.prepareStatement("SELECT EXISTS (SELECT 1 FROM (SELECT haslo FROM uzytkownicyPoprzednieHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 3) WHERE haslo = ?);");
+			PreparedStatement stmt = dbConn.prepareStatement("SELECT EXISTS (SELECT 1 FROM (SELECT haslo FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 3) WHERE haslo = ?);");
 			stmt.setString(1, login);
 			stmt.setString(2, passwordHash);
 			
@@ -306,9 +300,9 @@ public class DBServer implements Closeable {
 			if(rs.getInt(1) != 0)
 				throw new IllegalArgumentException("Nowe hasło musi być inne niż 3 poprzednie hasła");
 			
-			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET haslo = ? WHERE login = ?");
-			stmt.setString(1, passwordHash);
-			stmt.setString(2, login);
+			stmt = dbConn.prepareStatement("INSERT INTO uzytkownicyHasla (uzytkownikLogin, haslo) VALUES (?, ?);");
+			stmt.setString(2, passwordHash);
+			stmt.setString(1, login);
 			stmt.executeUpdate();
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -343,16 +337,13 @@ public class DBServer implements Closeable {
 	public LoginResult validateUserPassword(String login, String passwordHash) {
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(
-					"SELECT CASE"
-					+ " WHEN EXISTS (SELECT 1 FROM uzytkownicy WHERE login = ? AND haslo = ?) THEN 1"
-					+ " WHEN EXISTS (SELECT 1 FROM (SELECT 1 FROM uzytkownicyHasla WHERE uzytkownikLogin = ? AND haslo = ? AND uzyte <> 1 ORDER BY id DESC LIMIT 1)) THEN 2"
-					+ " ELSE 0"
-					+ " END;"
+					"SELECT CASE WHEN uh.id IS NULL OR DATE(wh.dataWygenerowania, '+7 days') <= DATE('now') THEN 0\r\n"
+					+ "WHEN wh.hasloId IS NULL THEN 1\r\n"
+					+ "ELSE 2 END FROM (SELECT id, haslo FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1) AS uh\r\n"
+					+ "LEFT JOIN (SELECT hasloId, dataWygenerowania FROM wygenerowaneHasla WHERE czyUzyte = 0) wh ON wh.hasloId = uh.id WHERE uh.haslo = ?;"
 			);
 			stmt.setString(1, login);
 			stmt.setString(2, passwordHash);
-			stmt.setString(3, login);
-			stmt.setString(4, passwordHash);
 			
 			ResultSet rs = stmt.executeQuery();
 			rs.next();
@@ -441,11 +432,18 @@ public class DBServer implements Closeable {
 		try {
 			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
 			PreparedStatement stmt = dbConn.prepareStatement(
-				"INSERT INTO uzytkownicyHasla (uzytkownikLogin, haslo, uzyte) VALUES (?, ?, 0);"
+				"INSERT INTO uzytkownicyHasla (uzytkownikLogin, haslo) VALUES (?, ?);"
 			);
 			stmt.setString(1, login);
 			stmt.setString(2, passwordHash);
-
+			
+			stmt.executeUpdate();
+			
+			stmt = dbConn.prepareStatement("INSERT INTO wygenerowaneHasla (hasloId, czyUzyte, dataWygenerowania) VALUES"
+					+ "((SELECT id FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1), 0, DATE('now'));");
+			
+			stmt.setString(1, login);
+			
 			stmt.executeUpdate();
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -456,7 +454,7 @@ public class DBServer implements Closeable {
 		try {
 			dbConn.createStatement().execute("PRAGMA foreign_keys = ON;");
 			PreparedStatement stmt = dbConn.prepareStatement(
-				"UPDATE uzytkownicyHasla SET uzyte = 1 WHERE id = (SELECT id FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1);"
+				"UPDATE wygenerowaneHasla SET czyUzyte = 1 WHERE hasloId = (SELECT id FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1);"
 			);
 			stmt.setString(1, login);
 
