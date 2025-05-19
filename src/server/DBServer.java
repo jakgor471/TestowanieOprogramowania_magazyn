@@ -336,16 +336,33 @@ public class DBServer implements Closeable {
 	
 	public LoginResult validateUserPassword(String login, String passwordHash) {
 		try {
-			PreparedStatement stmt = dbConn.prepareStatement(
+			/*PreparedStatement stmt = dbConn.prepareStatement(
 					"SELECT CASE WHEN uh.id IS NULL OR DATE(wh.dataWygenerowania, '+7 days') <= DATE('now') THEN 0\r\n"
 					+ "WHEN wh.hasloId IS NULL THEN 1\r\n"
 					+ "ELSE 2 END FROM (SELECT id, haslo FROM uzytkownicyHasla WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1) AS uh\r\n"
 					+ "LEFT JOIN (SELECT hasloId, dataWygenerowania FROM wygenerowaneHasla WHERE czyUzyte = 0) wh ON wh.hasloId = uh.id WHERE uh.haslo = ?;"
-			);
-			stmt.setString(1, login);
-			stmt.setString(2, passwordHash);
+			);*/
+			
+			PreparedStatement stmt = dbConn.prepareStatement("SELECT CASE WHEN res.haslo = ? THEN 1 ELSE 0 END\r\n"
+					+ "FROM\r\n"
+					+ "(SELECT haslo FROM uzytkownicyHasla uh LEFT JOIN wygenerowaneHasla wh ON uh.id = wh.hasloId WHERE uzytkownikLogin = ? AND hasloId IS NULL ORDER BY id DESC LIMIT 1) AS res;");
+			stmt.setString(1, passwordHash);
+			stmt.setString(2, login);
 			
 			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			
+			if(rs.getInt(1) == 1)
+				return LoginResult.RegularPassword;
+			
+			stmt = dbConn.prepareStatement("SELECT CASE WHEN res.haslo = ? AND res.czyUzyte = 0 THEN 2 ELSE 0 END\r\n"
+					+ "FROM\r\n"
+					+ "(SELECT haslo, czyUzyte FROM uzytkownicyHasla uh LEFT JOIN wygenerowaneHasla wh ON uh.id = wh.hasloId WHERE uzytkownikLogin = ? ORDER BY id DESC LIMIT 1) AS res;");
+			
+			stmt.setString(1, passwordHash);
+			stmt.setString(2, login);
+			
+			rs = stmt.executeQuery();
 			rs.next();
 			
 			return LoginResult.values()[rs.getInt(1)];
