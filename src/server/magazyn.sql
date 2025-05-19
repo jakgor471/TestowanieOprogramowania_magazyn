@@ -50,13 +50,6 @@ CREATE TABLE IF NOT EXISTS "uzytkownicy" (
 	"dataAktualizacji"	TEXT,
 	PRIMARY KEY("login")
 );
-CREATE TABLE IF NOT EXISTS "uzytkownicyHasla" (
-	"id" INTEGER NOT NULL UNIQUE,
-	"uzytkownikLogin" TEXT NOT NULL,
-	"haslo" TEXT NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login")
-);
 CREATE TABLE IF NOT EXISTS "adresy" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"miejscowosc"	TEXT NOT NULL,
@@ -71,6 +64,13 @@ CREATE TABLE IF NOT EXISTS "uzytkownicyAdresy" (
 	"adresId"	INTEGER NOT NULL,
 	PRIMARY KEY("uzytkownikLogin","adresId"),
 	FOREIGN KEY("adresId") REFERENCES "adresy"("id"),
+	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login") ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "uzytkownicyHasla" (
+	"id" INTEGER NOT NULL UNIQUE,
+	"uzytkownikLogin" TEXT NOT NULL,
+	"haslo" TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
 	FOREIGN KEY("uzytkownikLogin") REFERENCES "uzytkownicy"("login") ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "wygenerowaneHasla" (

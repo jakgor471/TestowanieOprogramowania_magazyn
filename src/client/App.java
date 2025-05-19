@@ -171,7 +171,9 @@ public class App {
 				
 				JTabbedPane tabs = new JTabbedPane();
 				tabs.addTab("Dane", new JScrollPane(eup));
-				tabs.addTab("Uprawnienia", new JScrollPane(perms));
+				
+				if(serverHandler.getSession().hasPermission(Permission.UserPermission))
+					tabs.addTab("Uprawnienia", new JScrollPane(perms));
 				
 				subframe.getContentPane().add(tabs);
 				
@@ -446,9 +448,12 @@ public class App {
 		fbox.add(filterEnt);
 		
 		Box fbox2 = Box.createHorizontalBox();
-		fbox2.add(addUser);
-		fbox2.add(editUser);
-		fbox2.add(forgetUser);
+		if(serverHandler.getSession().hasPermission(Permission.UserAdd))
+			fbox2.add(addUser);
+		if(serverHandler.getSession().hasPermission(Permission.UserEdit))
+			fbox2.add(editUser);
+		if(serverHandler.getSession().hasPermission(Permission.UserForget))
+			fbox2.add(forgetUser);
 		
 		entcpl.add((Component) fbox);
 		entcpl.add((Component) fbox2);
@@ -457,7 +462,8 @@ public class App {
 		
 		JTabbedPane mainTabs = new JTabbedPane();
 		mainTabs.addTab("Użytkownicy", leftPanel);
-		mainTabs.addTab("Uprawnienia", leftPanelPerm);
+		if(serverHandler.getSession().hasPermission(Permission.Administrator))
+			mainTabs.addTab("Uprawnienia", leftPanelPerm);
 		
 		JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mainTabs, userInfo);
 		

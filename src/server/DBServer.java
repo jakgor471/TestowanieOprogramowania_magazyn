@@ -254,7 +254,7 @@ public class DBServer implements Closeable {
 					throw new RuntimeException("Nie znaleziono wskazanego użytkownika!");
 			} else if(rs.getInt(1) > 0)
 				throw new IllegalArgumentException("Nieunikalny login użytkownika!");
-			
+
 			stmt = dbConn.prepareStatement("UPDATE uzytkownicy SET login = ?, imie = ?, nazwisko = ?, nrPesel = ?, dataUrodzenia = ?, plec = ?, email = ?, numerTelefonu = ?, zapomniany = ?, dataZapomnienia = ?, zapomnianyPrzez = ? WHERE login = ?;");
 			stmt.setString(1, user.getLogin());
 			stmt.setString(2, user.getName());

@@ -44,6 +44,8 @@ public class ActiveSession {
 	}
 	
 	public boolean hasPermission(Permission p) {
+		if(isAdmin())
+			return true;
 		return permission.contains(p);
 	}
 	

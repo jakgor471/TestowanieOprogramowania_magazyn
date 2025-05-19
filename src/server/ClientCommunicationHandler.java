@@ -37,23 +37,25 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		props = new Properties();
 		
 		File propFile = new File("server.properties");
-		if(!propFile.exists()) {
-			props.put("mail.smtp.auth", "true");
-			props.put("mail.smtp.starttls.enable", "true");
-			props.put("mail.smtp.host", "smtp.example.com");
-			props.put("mail.smtp.port", "587");
-			props.put("mail.password", "admin");
-			props.put("mail.address", "admin@gmail.com");
-			
-			try(FileOutputStream fo = new FileOutputStream(propFile)){
-				props.store(fo, null);
+		if(propFile.exists()) {
+			try(FileInputStream fi = new FileInputStream(propFile)) {
+				props.load(fi);
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		try(FileInputStream fi = new FileInputStream(propFile)) {
-			props.load(fi);
+		props.putIfAbsent("mail.smtp.auth", "true");
+		props.putIfAbsent("mail.smtp.starttls.enable", "true");
+		props.putIfAbsent("mail.smtp.host", "smtp.example.com");
+		props.putIfAbsent("mail.smtp.port", "587");
+		props.putIfAbsent("mail.password", "admin");
+		props.putIfAbsent("mail.address", "admin@gmail.com");
+		props.putIfAbsent("login.maxattempts", "3");
+		props.putIfAbsent("login.blocktime", "60");
+		
+		try(FileOutputStream fo = new FileOutputStream(propFile)){
+			props.store(fo, null);
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -73,10 +75,12 @@ public class ClientCommunicationHandler extends ServerCommunicationHandler {
 		DBServer.LoginResult result = server.validateUserPassword(login, hash);
 		
 		if(result == LoginResult.Invalid) {
-			long blockTime = server.loginBlockTime(login, "127.0.0.1", 2);
+			int loginTries = Integer.parseInt((String)props.getOrDefault("login.maxattempts", "2"));
+			long blockTime = server.loginBlockTime(login, "127.0.0.1", loginTries);
+			int blockProp = Integer.parseInt((String)props.getOrDefault("login.blocktime", "60")) * 1000;
 			
 			if(blockTime > -1) {
-				long newLoginTime = blockTime + 60000 - System.currentTimeMillis();
+				long newLoginTime = blockTime + blockProp - System.currentTimeMillis();
 				
 				if(newLoginTime > 0)
 					throw new Exception("Przekroczono limit prób! Kolejne logowanie możliwe za " + Math.round(newLoginTime/1000) + " sekund.");
